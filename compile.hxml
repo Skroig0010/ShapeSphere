@@ -1,0 +1,12 @@
+-cp src
+-main src.Game
+src.graphics.Color
+src.graphics.GraphicsDevice
+src.graphics.Material
+src.graphics.Mesh
+src.graphics.MeshPart
+
+src.math.Vec3
+src.math.Matrix4x4
+#src.math.AMatrix4x4
+-js build/Game.js
