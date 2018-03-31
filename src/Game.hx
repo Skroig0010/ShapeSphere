@@ -1,6 +1,7 @@
 package src;
 import src.graphics.*;
 import src.math.*;
+import src.scene.Scene;
 
 class Game{
     static public var gd : GraphicsDevice;
@@ -9,6 +10,7 @@ class Game{
 
     static var mesh : Mesh;
     static var mesh2 : Mesh;
+    static var scene : Scene;
 
     static public function main(){
         init();
@@ -24,20 +26,26 @@ class Game{
 
             var shader = gd.createShaderProgram(vert, frag);
 
-            var mat = new Material(gd, shader, Color.Red, 0.0, 0.0, 0.0, null);
-            var vertices:Array<Float> = [0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-        1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0,
-        -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0];
+            scene = new Scene();
+            var eye = new Vec3(0, 0.4, 1);
+            scene.setCamera(eye, eye.normalize(), new Vec3(0, 1, 0));
 
-            mesh = new Mesh(gd, 0, vertices, [0,1,2]);
+            var mat = new Material(gd, shader, Color.Red, 0.0, 0.0, 0.0, null);
+            var vertices:Array<Float> = [
+                0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                0.5, 0.0, 0.5, 0.0, 0.0, 0.0, 1.0, 0.0,
+                -0.5, 0.0, -0.5, 0.0, 0.0, 0.0, 0.0, 1.0];
+
+            mesh = new Mesh(gd, scene, vertices, [0,1,2]);
             var meshpart = new MeshPart(gd, mat, 3, 0, mesh);
             mesh.meshParts.add(meshpart);
 
-            var vertices2:Array<Float> = [0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-            1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
-            -1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+            var vertices2:Array<Float> = [
+                0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                0.5, 0.0, -0.5, 0.0, 0.0, 0.0, 0.0, 1.0,
+                -0.5, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0];
 
-            mesh2 = new Mesh(gd, 0, vertices2, [0,1,2]);
+            mesh2 = new Mesh(gd, scene, vertices2, [0,1,2]);
             var meshpart2 = new MeshPart(gd, mat, 3, 0, mesh2);
             mesh2.meshParts.add(meshpart2);
 
@@ -60,14 +68,20 @@ class Game{
     }
 
     static function loop(time:Float){
+        js.Browser.window.requestAnimationFrame(loop);
         var dt = time - prevTime;
         prevTime = time;
         update(dt);
         render(dt);
-        js.Browser.window.requestAnimationFrame(loop);
     }
 
     static function update(dt : Float){
+        var c = Math.cos(0.01);
+        var s = Math.sin(0.01);
+        var eye = scene.camera.position;
+        eye.x = eye.x * c - eye.z * s;
+        eye.z = eye.x * s + eye.z * c;
+        scene.camera.forward = eye.normalize();
     }
 
     static function render(dt : Float){

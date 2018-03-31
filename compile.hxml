@@ -1,12 +1,26 @@
 -cp src
 -main src.Game
+src.camera.Camera
+
 src.graphics.Color
 src.graphics.GraphicsDevice
+src.graphics.GraphicsExtensions
 src.graphics.Material
 src.graphics.Mesh
 src.graphics.MeshPart
 
+src.graphics.vertices.VertexType
+src.graphics.vertices.VertexDeclaration
+src.graphics.vertices.VertexElement
+src.graphics.vertices.VertexElementFormat
+src.graphics.vertices.VertexElementUsage
+src.graphics.vertices.VertexPosition
+
+
 src.math.Vec3
-src.math.Matrix4x4
-#src.math.AMatrix4x4
+src.math.Vec3Data
+src.math.Mat4
+src.math.Mat4Data
+
+src.scene.Scene
 -js build/Game.js
