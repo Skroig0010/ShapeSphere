@@ -2,6 +2,7 @@ package src.graphics;
 import js.html.webgl.*;
 import src.math.*;
 import src.scene.Scene;
+import src.graphics.vertices.VertexPositionNormalTexture;
 
 class Mesh{
     static var maxId : Int;
@@ -34,7 +35,7 @@ class Mesh{
             gd.setIndexBuffer(indexBuffer);
             for(part in meshParts){
                 part.material.apply(scene);
-                gd.drawElements(RenderingContext.TRIANGLES, part.vertexOffset, part.numVertices, part.material.shader);
+                gd.drawElements(RenderingContext.TRIANGLES, part.vertexOffset, part.numVertices, VertexPositionNormalTexture.vertexDeclaration, part.material.shader);
             }
         }
     }

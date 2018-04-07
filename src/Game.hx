@@ -1,5 +1,6 @@
 package src;
 import src.graphics.*;
+import src.graphics.shader.*;
 import src.math.*;
 import src.scene.Scene;
 
@@ -24,13 +25,15 @@ class Game{
             var vert = cast (response[0], String);
             var frag = cast (response[1], String);
 
-            var shader = gd.createShaderProgram(vert, frag);
+            var shader = new Shader(vert, frag);
 
             scene = new Scene();
             var eye = new Vec3(0, 0.4, 1);
             scene.setCamera(eye, eye.normalize(), new Vec3(0, 1, 0));
 
             var mat = new Material(gd, shader, Color.Red, 0.0, 0.0, 0.0, null);
+            // 必要な初期化だった。仕方がなかった。
+            new src.graphics.vertices.VertexPositionNormalTexture();
             var vertices:Array<Float> = [
                 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                 0.5, 0.0, 0.5, 0.0, 0.0, 0.0, 1.0, 0.0,

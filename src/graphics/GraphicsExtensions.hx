@@ -99,6 +99,39 @@ class GraphicsExtensions{
                 return false;
         }
     }
+
+    public static function getName(usage : VertexElementUsage){
+        switch(usage){
+            case VertexElementUsage.Position:
+                return "Position";
+            case VertexElementUsage.Color:
+                return "Color";
+            case VertexElementUsage.TextureCoordinate:
+                return "TextureCoordinate";
+            case VertexElementUsage.Normal:
+                return "Normal";
+            case VertexElementUsage.Binormal:
+                return "Binormal";
+            case VertexElementUsage.Tangent:
+                return "Tangent";
+            case VertexElementUsage.BlendIndices:
+                return "BlendIndices";
+            case VertexElementUsage.BlendWeight:
+                return "BlendWeight";
+            case VertexElementUsage.Depth:
+                return "Depth";
+            case VertexElementUsage.Fog:
+                return "Fog";
+            case VertexElementUsage.PointSize:
+                return "PointSize";
+            case VertexElementUsage.Sample:
+                return "Sample";
+            case VertexElementUsage.TessellateFactor:
+                return "TessellateFactor";
+        }
+        throw "argument exception";
+    }
+
     public static function getSize(elementFormat : VertexElementFormat){
         switch(elementFormat){
             case VertexElementFormat.Single:

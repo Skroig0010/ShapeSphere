@@ -1,12 +1,12 @@
 package src.graphics.vertices;
-import js.html.webgl.*;
+import src.graphics.shader.*;
 using src.graphics.GraphicsExtensions;
 
 class VertexDeclaration {
     public var vertexStride(default, null) : Int;
     public var elements : Array<VertexElement>;
     public var gd(null, default) : GraphicsDevice;
-    var shaderAttributeInfo = new Map<Program, VertexDeclarationAttributeInfo>();
+    var shaderAttributeInfo = new Map<Shader, VertexDeclarationAttributeInfo>();
 
     public function new(?vertexStride : Int, elements : Array<VertexElement>){
         if((elements == null) || (elements.length == 0)){
@@ -20,12 +20,13 @@ class VertexDeclaration {
         }
     }
 
-    function getAttributeInfo(shader : Program){
+    function getAttributeInfo(shader : Shader){
         var attrInfo = shaderAttributeInfo[shader];
         if(attrInfo == null){
             attrInfo = new VertexDeclarationAttributeInfo(GraphicsDevice.maxVertexAttributes);
             for(ve in elements){
-                var attributeLocation = gd.getAttribLocation(shader, ve.usage.getName());
+                // 0は無視され、1以降が名前に加わる
+                var attributeLocation = shader.getAttribLocation(ve.usage.getName() + if(ve.usageIndex >= 1) "" + ve.usageIndex else "");
                 if(attributeLocation < 0) 
                     continue;
 
@@ -37,7 +38,7 @@ class VertexDeclaration {
         return attrInfo;
     }
 
-    public function apply(shader : Program, offset : Int){
+    public function apply(shader : Shader, offset : Int){
         var attrInfo = getAttributeInfo(shader);
         for(element in attrInfo.elements){
             gd.vertexAttribPointer(element.attributeLocation,

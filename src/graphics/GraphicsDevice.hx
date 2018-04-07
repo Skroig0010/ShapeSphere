@@ -3,8 +3,11 @@ import js.html.webgl.*;
 import src.graphics.vertices.*;
 
 class GraphicsDevice{
-    var gl:RenderingContext;
+    public static var gl:RenderingContext;
     public static var maxVertexAttributes : Int;
+
+    public var vertexBuffer : Buffer;
+    public var indexBuffer : Buffer;
 
     public function new(canvas : js.html.CanvasElement){
         try {
@@ -58,62 +61,15 @@ class GraphicsDevice{
         gl.bindBuffer(RenderingContext.ELEMENT_ARRAY_BUFFER, buffer);
     }
 
-    public function createShaderProgram(vertexShaderSource : String, fragmentShaderSource : String) : Program{
-        var vertexShader =
-            getShader(RenderingContext.VERTEX_SHADER, vertexShaderSource);
-        var fragmentShader =
-            getShader(RenderingContext.FRAGMENT_SHADER, fragmentShaderSource);
-
-        var shaderProgram = gl.createProgram();
-        gl.attachShader(shaderProgram, vertexShader);
-        gl.attachShader(shaderProgram, fragmentShader);
-        gl.linkProgram(shaderProgram); 
-
-        if(!gl.getProgramParameter(
-                    shaderProgram, RenderingContext.LINK_STATUS)) {
-            js.Browser.alert('Could not initialize shaders');
-        }
-
-        return shaderProgram;
-    }
-
-    public function useProgram(program : Program){
-        gl.useProgram(program);
-    }
-
-    function getShader(shaderType: Int, str: String){
-        var shader = gl.createShader(shaderType);
-
-        gl.shaderSource(shader, str);
-        gl.compileShader(shader);
-
-        if(!gl.getShaderParameter(shader, RenderingContext.COMPILE_STATUS)) {
-            js.Browser.alert(gl.getShaderInfoLog(shader));
-            return null;
-        }
-
-        return shader;
-    }
-
-    public function getAttribLocation(program : Program, name : String){
-        var location = gl.getAttribLocation(program, name);
-        gl.enableVertexAttribArray(location);
-        return location;
-    }
-
     public function vertexAttribPointer(location : Int, size : Int, pointerType : Int, normalized : Bool, stride : Int, offset : Int){
         gl.vertexAttribPointer(location, size, pointerType, normalized, stride, offset);
-    }
-
-    public function getUniformLocation(program : Program, name : String){
-        return gl.getUniformLocation(program, name);
     }
 
     public function uniformMatrix4fv(location : UniformLocation, matrix : Array<Float>){
         gl.uniformMatrix4fv(location, false, matrix);
     }
 
-    public function drawElements(mode : Int, offset : Int, count : Int, ?declaration : VertexDeclaration, shader : Program){
+    public function drawElements(mode : Int, offset : Int, count : Int, ?declaration : VertexDeclaration, shader : src.graphics.shader.Shader){
         if(declaration != null){
             declaration.gd = this;
             declaration.apply(shader, offset);

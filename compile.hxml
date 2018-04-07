@@ -9,14 +9,19 @@ src.graphics.Material
 src.graphics.Mesh
 src.graphics.MeshPart
 
+src.graphics.shader.Shader
+
 src.graphics.vertices.VertexType
 src.graphics.vertices.VertexDeclaration
 src.graphics.vertices.VertexElement
 src.graphics.vertices.VertexElementFormat
 src.graphics.vertices.VertexElementUsage
 src.graphics.vertices.VertexPosition
+src.graphics.vertices.VertexPositionNormalTexture
 
 
+src.math.Vec2
+src.math.Vec2Data
 src.math.Vec3
 src.math.Vec3Data
 src.math.Mat4

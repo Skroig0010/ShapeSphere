@@ -69,6 +69,33 @@ haxe_ds_ObjectMap.prototype = {
 	}
 	,__class__: haxe_ds_ObjectMap
 };
+var haxe_ds_StringMap = function() {
+	this.h = { };
+};
+haxe_ds_StringMap.__name__ = true;
+haxe_ds_StringMap.__interfaces__ = [haxe_IMap];
+haxe_ds_StringMap.prototype = {
+	setReserved: function(key,value) {
+		if(this.rh == null) {
+			this.rh = { };
+		}
+		this.rh["$" + key] = value;
+	}
+	,getReserved: function(key) {
+		if(this.rh == null) {
+			return null;
+		} else {
+			return this.rh["$" + key];
+		}
+	}
+	,existsReserved: function(key) {
+		if(this.rh == null) {
+			return false;
+		}
+		return this.rh.hasOwnProperty("$" + key);
+	}
+	,__class__: haxe_ds_StringMap
+};
 var haxe_io_Error = { __ename__ : true, __constructs__ : ["Blocked","Overflow","OutsideBounds","Custom"] };
 haxe_io_Error.Blocked = ["Blocked",0];
 haxe_io_Error.Blocked.toString = $estr;
@@ -654,7 +681,7 @@ src_Game.main = function() {
 	Promise.all([vert,frag]).then(function(response2) {
 		var vert1 = js_Boot.__cast(response2[0] , String);
 		var frag1 = js_Boot.__cast(response2[1] , String);
-		var shader = src_Game.gd.createShaderProgram(vert1,frag1);
+		var shader = new src_graphics_shader_Shader(vert1,frag1);
 		src_Game.scene = new src_scene_Scene();
 		var this1 = new src_math_Vec3Data(0,0.4,1);
 		var eye = this1;
@@ -664,6 +691,7 @@ src_Game.main = function() {
 		var this3 = new src_math_Vec3Data(0,1,0);
 		tmp.setCamera(eye,this2,this3);
 		var mat = new src_graphics_Material(src_Game.gd,shader,src_graphics_Color.Red,0.0,0.0,0.0,null);
+		new src_graphics_vertices_VertexPositionNormalTexture();
 		var vertices = [0.0,0.5,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,0.5,0.0,0.0,0.0,1.0,0.0,-0.5,0.0,-0.5,0.0,0.0,0.0,0.0,1.0];
 		src_Game.mesh = new src_graphics_Mesh(src_Game.gd,src_Game.scene,vertices,[0,1,2]);
 		var meshpart = new src_graphics_MeshPart(src_Game.gd,mat,3,0,src_Game.mesh);
@@ -758,99 +786,66 @@ src_graphics_Color.White.__enum__ = src_graphics_Color;
 src_graphics_Color.Rgb = function(r,g,b) { var $x = ["Rgb",5,r,g,b]; $x.__enum__ = src_graphics_Color; $x.toString = $estr; return $x; };
 var src_graphics_GraphicsDevice = function(canvas) {
 	try {
-		this.gl = canvas.getContext("webgl");
-		if(this.gl == null) {
+		src_graphics_GraphicsDevice.gl = canvas.getContext("webgl");
+		if(src_graphics_GraphicsDevice.gl == null) {
 			js_Browser.alert("Could not initialize WebGL");
 		}
 	} catch( e ) {
 		if (e instanceof js__$Boot_HaxeError) e = e.val;
 		js_Browser.alert(e);
 	}
-	this.gl.enable(2929);
-	this.gl.viewport(0,0,canvas.width,canvas.height);
-	this.gl.clearColor(0.0,0.0,0.0,1.0);
-	this.gl.clear(16640);
-	src_graphics_GraphicsDevice.maxVertexAttributes = this.gl.getParameter(34921);
+	src_graphics_GraphicsDevice.gl.enable(2929);
+	src_graphics_GraphicsDevice.gl.viewport(0,0,canvas.width,canvas.height);
+	src_graphics_GraphicsDevice.gl.clearColor(0.0,0.0,0.0,1.0);
+	src_graphics_GraphicsDevice.gl.clear(16640);
+	src_graphics_GraphicsDevice.maxVertexAttributes = src_graphics_GraphicsDevice.gl.getParameter(34921);
 };
 src_graphics_GraphicsDevice.__name__ = true;
 src_graphics_GraphicsDevice.prototype = {
 	resize: function(width,height) {
-		this.gl.canvas.width = width;
-		this.gl.canvas.height = height;
-		this.gl.viewport(0,0,width,height);
+		src_graphics_GraphicsDevice.gl.canvas.width = width;
+		src_graphics_GraphicsDevice.gl.canvas.height = height;
+		src_graphics_GraphicsDevice.gl.viewport(0,0,width,height);
 	}
 	,createArrayBuffer: function(vertices) {
-		var buffer = this.gl.createBuffer();
-		this.gl.bindBuffer(34962,buffer);
-		this.gl.bufferData(34962,new Float32Array(vertices),35044);
-		this.gl.bindBuffer(34962,null);
+		var buffer = src_graphics_GraphicsDevice.gl.createBuffer();
+		src_graphics_GraphicsDevice.gl.bindBuffer(34962,buffer);
+		src_graphics_GraphicsDevice.gl.bufferData(34962,new Float32Array(vertices),35044);
+		src_graphics_GraphicsDevice.gl.bindBuffer(34962,null);
 		return buffer;
 	}
 	,createIndexBuffer: function(indices) {
-		var buffer = this.gl.createBuffer();
-		this.gl.bindBuffer(34963,buffer);
-		this.gl.bufferData(34963,new Int16Array(indices),35044);
-		this.gl.bindBuffer(34963,null);
+		var buffer = src_graphics_GraphicsDevice.gl.createBuffer();
+		src_graphics_GraphicsDevice.gl.bindBuffer(34963,buffer);
+		src_graphics_GraphicsDevice.gl.bufferData(34963,new Int16Array(indices),35044);
+		src_graphics_GraphicsDevice.gl.bindBuffer(34963,null);
 		return buffer;
 	}
 	,setVertexBuffer: function(buffer) {
-		this.gl.bindBuffer(34962,buffer);
+		src_graphics_GraphicsDevice.gl.bindBuffer(34962,buffer);
 	}
 	,setIndexBuffer: function(buffer) {
-		this.gl.bindBuffer(34963,buffer);
-	}
-	,createShaderProgram: function(vertexShaderSource,fragmentShaderSource) {
-		var vertexShader = this.getShader(35633,vertexShaderSource);
-		var fragmentShader = this.getShader(35632,fragmentShaderSource);
-		var shaderProgram = this.gl.createProgram();
-		this.gl.attachShader(shaderProgram,vertexShader);
-		this.gl.attachShader(shaderProgram,fragmentShader);
-		this.gl.linkProgram(shaderProgram);
-		if(!this.gl.getProgramParameter(shaderProgram,35714)) {
-			js_Browser.alert("Could not initialize shaders");
-		}
-		return shaderProgram;
-	}
-	,useProgram: function(program) {
-		this.gl.useProgram(program);
-	}
-	,getShader: function(shaderType,str) {
-		var shader = this.gl.createShader(shaderType);
-		this.gl.shaderSource(shader,str);
-		this.gl.compileShader(shader);
-		if(!this.gl.getShaderParameter(shader,35713)) {
-			js_Browser.alert(this.gl.getShaderInfoLog(shader));
-			return null;
-		}
-		return shader;
-	}
-	,getAttribLocation: function(program,name) {
-		var location = this.gl.getAttribLocation(program,name);
-		this.gl.enableVertexAttribArray(location);
-		return location;
+		src_graphics_GraphicsDevice.gl.bindBuffer(34963,buffer);
 	}
 	,vertexAttribPointer: function(location,size,pointerType,normalized,stride,offset) {
-		this.gl.vertexAttribPointer(location,size,pointerType,normalized,stride,offset);
-	}
-	,getUniformLocation: function(program,name) {
-		return this.gl.getUniformLocation(program,name);
+		src_graphics_GraphicsDevice.gl.vertexAttribPointer(location,size,pointerType,normalized,stride,offset);
 	}
 	,uniformMatrix4fv: function(location,matrix) {
-		this.gl.uniformMatrix4fv(location,false,matrix);
+		src_graphics_GraphicsDevice.gl.uniformMatrix4fv(location,false,matrix);
 	}
 	,drawElements: function(mode,offset,count,declaration,shader) {
 		if(declaration != null) {
 			declaration.gd = this;
 			declaration.apply(shader,offset);
 		}
-		this.gl.drawElements(mode,count,5123,offset);
+		src_graphics_GraphicsDevice.gl.drawElements(mode,count,5123,offset);
 	}
 	,startRender: function() {
-		this.gl.clearColor(0,0,0,1);
-		this.gl.clear(16640);
+		src_graphics_GraphicsDevice.gl.clearColor(0,0,0,1);
+		src_graphics_GraphicsDevice.gl.clear(16640);
 	}
 	,endRender: function() {
-		this.gl.flush();
+		src_graphics_GraphicsDevice.gl.flush();
 	}
 	,__class__: src_graphics_GraphicsDevice
 };
@@ -926,6 +921,36 @@ src_graphics_GraphicsExtensions.vertexAttribNormalized = function(element) {
 		return false;
 	}
 };
+src_graphics_GraphicsExtensions.getName = function(usage) {
+	switch(usage[1]) {
+	case 0:
+		return "Position";
+	case 1:
+		return "Color";
+	case 2:
+		return "TextureCoordinate";
+	case 3:
+		return "Normal";
+	case 4:
+		return "Binormal";
+	case 5:
+		return "Tangent";
+	case 6:
+		return "BlendIndices";
+	case 7:
+		return "BlendWeight";
+	case 8:
+		return "Depth";
+	case 9:
+		return "Fog";
+	case 10:
+		return "PointSize";
+	case 11:
+		return "Sample";
+	case 12:
+		return "TessellateFactor";
+	}
+};
 src_graphics_GraphicsExtensions.getSize = function(elementFormat) {
 	switch(elementFormat[1]) {
 	case 0:
@@ -962,20 +987,14 @@ var src_graphics_Material = function(gd,shader,col,dif,amb,spc,tex) {
 	this.amb = amb;
 	this.spc = spc;
 	this.tex = tex;
-	this.vertexPositionAttr = gd.getAttribLocation(shader,"vPosition");
-	this.normalPositionAttr = gd.getAttribLocation(shader,"vNormal");
-	this.uvPositionAttr = gd.getAttribLocation(shader,"vUv");
-	this.transMatrixLocation = gd.getUniformLocation(shader,"transMatrix");
-	this.viewMatrixLocation = gd.getUniformLocation(shader,"viewMatrix");
-	this.projMatrixLocation = gd.getUniformLocation(shader,"projMatrix");
+	this.transMatrixLocation = shader.getUniformLocation("transMatrix");
+	this.viewMatrixLocation = shader.getUniformLocation("viewMatrix");
+	this.projMatrixLocation = shader.getUniformLocation("projMatrix");
 };
 src_graphics_Material.__name__ = true;
 src_graphics_Material.prototype = {
 	apply: function(scene) {
-		this.gd.useProgram(this.shader);
-		this.gd.vertexAttribPointer(this.vertexPositionAttr,3,5126,false,32,0);
-		this.gd.vertexAttribPointer(this.normalPositionAttr,3,5126,false,32,12);
-		this.gd.vertexAttribPointer(this.uvPositionAttr,2,5126,false,32,24);
+		this.shader.useProgram();
 		var tmp = this.gd;
 		var tmp1 = this.transMatrixLocation;
 		var this1 = new src_math_Mat4Data([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);
@@ -1027,7 +1046,7 @@ src_graphics_Mesh.prototype = {
 				_g_head = _g_head.next;
 				var part = val;
 				part.material.apply(this.scene);
-				this.gd.drawElements(4,part.vertexOffset,part.numVertices,null,part.material.shader);
+				this.gd.drawElements(4,part.vertexOffset,part.numVertices,src_graphics_vertices_VertexPositionNormalTexture.vertexDeclaration,part.material.shader);
 			}
 		}
 	}
@@ -1042,6 +1061,62 @@ var src_graphics_MeshPart = function(gd,material,numVertices,vertexOffset,parent
 src_graphics_MeshPart.__name__ = true;
 src_graphics_MeshPart.prototype = {
 	__class__: src_graphics_MeshPart
+};
+var src_graphics_shader_Shader = function(vertexShaderSource,fragmentShaderSource) {
+	var vertexShader = this.getShader(35633,vertexShaderSource);
+	var fragmentShader = this.getShader(35632,fragmentShaderSource);
+	this.program = this.get_gl().createProgram();
+	this.get_gl().attachShader(this.program,vertexShader);
+	this.get_gl().attachShader(this.program,fragmentShader);
+	this.get_gl().linkProgram(this.program);
+	if(!this.get_gl().getProgramParameter(this.program,35714)) {
+		js_Browser.alert("Could not initialize shaders");
+	}
+	this.uniformLocations = new haxe_ds_StringMap();
+};
+src_graphics_shader_Shader.__name__ = true;
+src_graphics_shader_Shader.prototype = {
+	get_gl: function() {
+		return src_graphics_GraphicsDevice.gl;
+	}
+	,getAttribLocation: function(name) {
+		var location = this.get_gl().getAttribLocation(this.program,name);
+		this.get_gl().enableVertexAttribArray(location);
+		return location;
+	}
+	,getUniformLocation: function(name) {
+		var _this = this.uniformLocations;
+		if(__map_reserved[name] != null ? _this.existsReserved(name) : _this.h.hasOwnProperty(name)) {
+			var _this1 = this.uniformLocations;
+			if(__map_reserved[name] != null) {
+				return _this1.getReserved(name);
+			} else {
+				return _this1.h[name];
+			}
+		}
+		var location = this.get_gl().getUniformLocation(this.program,name);
+		var _this2 = this.uniformLocations;
+		if(__map_reserved[name] != null) {
+			_this2.setReserved(name,location);
+		} else {
+			_this2.h[name] = location;
+		}
+		return location;
+	}
+	,useProgram: function() {
+		this.get_gl().useProgram(this.program);
+	}
+	,getShader: function(shaderType,str) {
+		var shader = this.get_gl().createShader(shaderType);
+		this.get_gl().shaderSource(shader,str);
+		this.get_gl().compileShader(shader);
+		if(!this.get_gl().getShaderParameter(shader,35713)) {
+			js_Browser.alert(this.get_gl().getShaderInfoLog(shader));
+			return null;
+		}
+		return shader;
+	}
+	,__class__: src_graphics_shader_Shader
 };
 var src_graphics_vertices_VertexDeclaration = function(vertexStride,elements) {
 	this.shaderAttributeInfo = new haxe_ds_ObjectMap();
@@ -1066,7 +1141,7 @@ src_graphics_vertices_VertexDeclaration.prototype = {
 			while(_g < _g1.length) {
 				var ve = _g1[_g];
 				++_g;
-				var attributeLocation = this.gd.getAttribLocation(shader,ve.usage[0]);
+				var attributeLocation = shader.getAttribLocation(src_graphics_GraphicsExtensions.getName(ve.usage) + (ve.usageIndex >= 1 ? "" + ve.usageIndex : ""));
 				if(attributeLocation < 0) {
 					continue;
 				}
@@ -1216,21 +1291,27 @@ src_graphics_vertices_VertexElementUsage.TessellateFactor.toString = $estr;
 src_graphics_vertices_VertexElementUsage.TessellateFactor.__enum__ = src_graphics_vertices_VertexElementUsage;
 var src_graphics_vertices_VertexType = function() { };
 src_graphics_vertices_VertexType.__name__ = true;
-src_graphics_vertices_VertexType.prototype = {
-	__class__: src_graphics_vertices_VertexType
-};
 var src_graphics_vertices_VertexPosition = function() {
 	var elements = [];
 	elements.push(new src_graphics_vertices_VertexElement(0,src_graphics_vertices_VertexElementFormat.Vector3,src_graphics_vertices_VertexElementUsage.Position,0));
-	var declaration = new src_graphics_vertices_VertexDeclaration(3,elements);
+	src_graphics_vertices_VertexPosition.vertexDeclaration = new src_graphics_vertices_VertexDeclaration(3,elements);
 };
 src_graphics_vertices_VertexPosition.__name__ = true;
 src_graphics_vertices_VertexPosition.__interfaces__ = [src_graphics_vertices_VertexType];
 src_graphics_vertices_VertexPosition.prototype = {
-	get_vertexDeclaration: function() {
-		return this.vertexDeclaration;
-	}
-	,__class__: src_graphics_vertices_VertexPosition
+	__class__: src_graphics_vertices_VertexPosition
+};
+var src_graphics_vertices_VertexPositionNormalTexture = function() {
+	var elements = [];
+	elements.push(new src_graphics_vertices_VertexElement(0,src_graphics_vertices_VertexElementFormat.Vector3,src_graphics_vertices_VertexElementUsage.Position,0));
+	elements.push(new src_graphics_vertices_VertexElement(12,src_graphics_vertices_VertexElementFormat.Vector3,src_graphics_vertices_VertexElementUsage.Normal,0));
+	elements.push(new src_graphics_vertices_VertexElement(24,src_graphics_vertices_VertexElementFormat.Vector2,src_graphics_vertices_VertexElementUsage.TextureCoordinate,0));
+	src_graphics_vertices_VertexPositionNormalTexture.vertexDeclaration = new src_graphics_vertices_VertexDeclaration(null,elements);
+};
+src_graphics_vertices_VertexPositionNormalTexture.__name__ = true;
+src_graphics_vertices_VertexPositionNormalTexture.__interfaces__ = [src_graphics_vertices_VertexType];
+src_graphics_vertices_VertexPositionNormalTexture.prototype = {
+	__class__: src_graphics_vertices_VertexPositionNormalTexture
 };
 var src_math__$Mat4_Mat4_$Impl_$ = {};
 src_math__$Mat4_Mat4_$Impl_$.__name__ = true;
@@ -1364,6 +1445,46 @@ src_math_Mat4Data.__name__ = true;
 src_math_Mat4Data.prototype = {
 	__class__: src_math_Mat4Data
 };
+var src_math__$Vec2_Vec2_$Impl_$ = {};
+src_math__$Vec2_Vec2_$Impl_$.__name__ = true;
+src_math__$Vec2_Vec2_$Impl_$._new = function(x,y) {
+	var this1 = new src_math_Vec2Data(x,y);
+	return this1;
+};
+src_math__$Vec2_Vec2_$Impl_$.$length = function(this1) {
+	return Math.sqrt(this1.x * this1.x + this1.y * this1.y);
+};
+src_math__$Vec2_Vec2_$Impl_$.normalize = function(this1) {
+	var l = Math.sqrt(this1.x * this1.x + this1.y * this1.y);
+	var this2 = new src_math_Vec2Data(this1.x / l,this1.y / l);
+	return this2;
+};
+src_math__$Vec2_Vec2_$Impl_$.minus = function(v) {
+	var this1 = new src_math_Vec2Data(-v.x,-v.y);
+	return this1;
+};
+src_math__$Vec2_Vec2_$Impl_$.add = function(v1,v2) {
+	var this1 = new src_math_Vec2Data(v1.x + v2.x,v1.y + v2.y);
+	return this1;
+};
+src_math__$Vec2_Vec2_$Impl_$.sub = function(v1,v2) {
+	var this1 = new src_math_Vec2Data(v1.x - v2.x,v1.y - v2.y);
+	return this1;
+};
+src_math__$Vec2_Vec2_$Impl_$.dot = function(this1,v) {
+	return this1.x * v.x + this1.y * v.y;
+};
+src_math__$Vec2_Vec2_$Impl_$.cross = function(this1,v) {
+	return this1.x * v.y - this1.y * v.x;
+};
+var src_math_Vec2Data = function(x,y) {
+	this.x = x;
+	this.y = y;
+};
+src_math_Vec2Data.__name__ = true;
+src_math_Vec2Data.prototype = {
+	__class__: src_math_Vec2Data
+};
 var src_math__$Vec3_Vec3_$Impl_$ = {};
 src_math__$Vec3_Vec3_$Impl_$.__name__ = true;
 src_math__$Vec3_Vec3_$Impl_$._new = function(x,y,z) {
@@ -1435,6 +1556,7 @@ var Float = Number;
 var Bool = Boolean;
 var Class = { };
 var Enum = { };
+var __map_reserved = {};
 var ArrayBuffer = $global.ArrayBuffer || js_html_compat_ArrayBuffer;
 if(ArrayBuffer.prototype.slice == null) {
 	ArrayBuffer.prototype.slice = js_html_compat_ArrayBuffer.sliceImpl;
