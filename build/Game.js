@@ -7,6 +7,64 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
+var EReg = function() { };
+EReg.__name__ = true;
+EReg.prototype = {
+	match: function(s) {
+		if(this.r.global) {
+			this.r.lastIndex = 0;
+		}
+		this.r.m = this.r.exec(s);
+		this.r.s = s;
+		return this.r.m != null;
+	}
+	,__class__: EReg
+};
+var HxOverrides = function() { };
+HxOverrides.__name__ = true;
+HxOverrides.substr = function(s,pos,len) {
+	if(len == null) {
+		len = s.length;
+	} else if(len < 0) {
+		if(pos == 0) {
+			len = s.length + len;
+		} else {
+			return "";
+		}
+	}
+	return s.substr(pos,len);
+};
+HxOverrides.iter = function(a) {
+	return { cur : 0, arr : a, hasNext : function() {
+		return this.cur < this.arr.length;
+	}, next : function() {
+		return this.arr[this.cur++];
+	}};
+};
+var Lambda = function() { };
+Lambda.__name__ = true;
+Lambda.array = function(it) {
+	var a = [];
+	var i = $iterator(it)();
+	while(i.hasNext()) {
+		var i1 = i.next();
+		a.push(i1);
+	}
+	return a;
+};
+Lambda.flatten = function(it) {
+	var l = new haxe_ds_List();
+	var e = $iterator(it)();
+	while(e.hasNext()) {
+		var e1 = e.next();
+		var x = $iterator(e1)();
+		while(x.hasNext()) {
+			var x1 = x.next();
+			l.add(x1);
+		}
+	}
+	return l;
+};
 Math.__name__ = true;
 var Std = function() { };
 Std.__name__ = true;
@@ -46,6 +104,9 @@ haxe_ds_List.prototype = {
 		}
 		this.length++;
 	}
+	,iterator: function() {
+		return new haxe_ds__$List_ListIterator(this.h);
+	}
 	,__class__: haxe_ds_List
 };
 var haxe_ds__$List_ListNode = function(item,next) {
@@ -55,6 +116,21 @@ var haxe_ds__$List_ListNode = function(item,next) {
 haxe_ds__$List_ListNode.__name__ = true;
 haxe_ds__$List_ListNode.prototype = {
 	__class__: haxe_ds__$List_ListNode
+};
+var haxe_ds__$List_ListIterator = function(head) {
+	this.head = head;
+};
+haxe_ds__$List_ListIterator.__name__ = true;
+haxe_ds__$List_ListIterator.prototype = {
+	hasNext: function() {
+		return this.head != null;
+	}
+	,next: function() {
+		var val = this.head.item;
+		this.head = this.head.next;
+		return val;
+	}
+	,__class__: haxe_ds__$List_ListIterator
 };
 var haxe_ds_ObjectMap = function() {
 	this.h = { __keys__ : { }};
@@ -678,9 +754,16 @@ src_Game.main = function() {
 	var frag = window.fetch("main.frag").then(function(response1) {
 		return response1.text();
 	});
-	Promise.all([vert,frag]).then(function(response2) {
-		var vert1 = js_Boot.__cast(response2[0] , String);
-		var frag1 = js_Boot.__cast(response2[1] , String);
+	var mqo = window.fetch("sample.mqo").then(function(response2) {
+		return response2.text();
+	});
+	var tex = new Promise(function(resolve,reject) {
+		new src_graphics_Texture("sample.png",resolve);
+	});
+	Promise.all([vert,frag,tex]).then(function(response3) {
+		var vert1 = js_Boot.__cast(response3[0] , String);
+		var frag1 = js_Boot.__cast(response3[1] , String);
+		var tex1 = js_Boot.__cast(response3[2] , src_graphics_Texture);
 		var shader = new src_graphics_shader_Shader(vert1,frag1);
 		src_Game.scene = new src_scene_Scene();
 		var this1 = new src_math_Vec3Data(0,0.4,1);
@@ -690,14 +773,36 @@ src_Game.main = function() {
 		var this2 = new src_math_Vec3Data(eye.x / l,eye.y / l,eye.z / l);
 		var this3 = new src_math_Vec3Data(0,1,0);
 		tmp.setCamera(eye,this2,this3);
-		var mat = new src_graphics_Material(src_Game.gd,shader,src_graphics_Color.Red,0.0,0.0,0.0,null);
-		new src_graphics_vertices_VertexPositionNormalTexture();
-		var vertices = [0.0,0.5,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,0.5,0.0,0.0,0.0,1.0,0.0,-0.5,0.0,-0.5,0.0,0.0,0.0,0.0,1.0];
-		src_Game.mesh = new src_graphics_Mesh(src_Game.gd,src_Game.scene,vertices,[0,1,2]);
+		tex1.setFilter(src_graphics_states_TextureFilter.Point);
+		var mat = new src_graphics_Material(src_Game.gd,shader,src_graphics_Color.Red,0.0,0.0,0.0,tex1);
+		var this4 = new src_math_Vec3Data(0.0,0.5,0.0);
+		var this5 = new src_math_Vec3Data(0.0,0.0,0.0);
+		var this6 = new src_math_Vec2Data(0.0,0.0);
+		var vertices = new src_graphics_vertices_VertexPositionNormalTexture(this4,this5,this6);
+		var this7 = new src_math_Vec3Data(0.5,0.0,0.5);
+		var this8 = new src_math_Vec3Data(0.0,0.0,0.0);
+		var this9 = new src_math_Vec2Data(1.0,0.0);
+		var vertices1 = new src_graphics_vertices_VertexPositionNormalTexture(this7,this8,this9);
+		var this10 = new src_math_Vec3Data(-0.5,0.0,-0.5);
+		var this11 = new src_math_Vec3Data(0.0,0.0,0.0);
+		var this12 = new src_math_Vec2Data(0.0,1.0);
+		var vertices2 = Lambda.array(Lambda.flatten(Lambda.flatten([vertices,vertices1,new src_graphics_vertices_VertexPositionNormalTexture(this10,this11,this12)])));
+		src_Game.mesh = new src_graphics_Mesh(src_Game.gd,src_Game.scene,vertices2,[0,1,2]);
 		var meshpart = new src_graphics_MeshPart(src_Game.gd,mat,3,0,src_Game.mesh);
 		src_Game.mesh.meshParts.add(meshpart);
-		var vertices2 = [0.0,0.5,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,-0.5,0.0,0.0,0.0,0.0,1.0,-0.5,0.0,0.5,0.0,0.0,0.0,0.0,0.0];
-		src_Game.mesh2 = new src_graphics_Mesh(src_Game.gd,src_Game.scene,vertices2,[0,1,2]);
+		var this13 = new src_math_Vec3Data(0.0,0.5,0.0);
+		var this14 = new src_math_Vec3Data(0.0,0.0,0.0);
+		var this15 = new src_math_Vec2Data(0.0,0.0);
+		var vertices21 = new src_graphics_vertices_VertexPositionNormalTexture(this13,this14,this15);
+		var this16 = new src_math_Vec3Data(0.5,0.0,-0.5);
+		var this17 = new src_math_Vec3Data(0.0,0.0,0.0);
+		var this18 = new src_math_Vec2Data(0.0,1.0);
+		var vertices22 = new src_graphics_vertices_VertexPositionNormalTexture(this16,this17,this18);
+		var this19 = new src_math_Vec3Data(-0.5,0.0,0.5);
+		var this20 = new src_math_Vec3Data(0.0,0.0,0.0);
+		var this21 = new src_math_Vec2Data(1.0,1.0);
+		var vertices23 = Lambda.array(Lambda.flatten(Lambda.flatten([vertices21,vertices22,new src_graphics_vertices_VertexPositionNormalTexture(this19,this20,this21)])));
+		src_Game.mesh2 = new src_graphics_Mesh(src_Game.gd,src_Game.scene,vertices23,[0,1,2]);
 		var meshpart2 = new src_graphics_MeshPart(src_Game.gd,mat,3,0,src_Game.mesh2);
 		src_Game.mesh2.meshParts.add(meshpart2);
 		window.requestAnimationFrame(src_Game.loop);
@@ -767,6 +872,17 @@ src_camera_Camera.__name__ = true;
 src_camera_Camera.prototype = {
 	__class__: src_camera_Camera
 };
+var src_content_ContentManager = function() { };
+src_content_ContentManager.__name__ = true;
+var src_content_contentreaders_ModelReader = function() { };
+src_content_contentreaders_ModelReader.__name__ = true;
+src_content_contentreaders_ModelReader.makeMesh = function(sourceText) {
+};
+src_content_contentreaders_ModelReader.prototype = {
+	read: function(text) {
+	}
+	,__class__: src_content_contentreaders_ModelReader
+};
 var src_graphics_Color = { __ename__ : true, __constructs__ : ["Red","Green","Blue","Black","White","Rgb"] };
 src_graphics_Color.Red = ["Red",0];
 src_graphics_Color.Red.toString = $estr;
@@ -829,6 +945,9 @@ src_graphics_GraphicsDevice.prototype = {
 	}
 	,vertexAttribPointer: function(location,size,pointerType,normalized,stride,offset) {
 		src_graphics_GraphicsDevice.gl.vertexAttribPointer(location,size,pointerType,normalized,stride,offset);
+	}
+	,uniform1i: function(location,x) {
+		src_graphics_GraphicsDevice.gl.uniform1i(location,x);
 	}
 	,uniformMatrix4fv: function(location,matrix) {
 		src_graphics_GraphicsDevice.gl.uniformMatrix4fv(location,false,matrix);
@@ -990,11 +1109,18 @@ var src_graphics_Material = function(gd,shader,col,dif,amb,spc,tex) {
 	this.transMatrixLocation = shader.getUniformLocation("transMatrix");
 	this.viewMatrixLocation = shader.getUniformLocation("viewMatrix");
 	this.projMatrixLocation = shader.getUniformLocation("projMatrix");
+	if(tex != null) {
+		this.textureLocation = shader.getUniformLocation("texture");
+	}
 };
 src_graphics_Material.__name__ = true;
 src_graphics_Material.prototype = {
 	apply: function(scene) {
 		this.shader.useProgram();
+		if(this.tex != null) {
+			this.tex.useTexture();
+			this.gd.uniform1i(this.textureLocation,0);
+		}
 		var tmp = this.gd;
 		var tmp1 = this.transMatrixLocation;
 		var this1 = new src_math_Mat4Data([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);
@@ -1062,7 +1188,89 @@ src_graphics_MeshPart.__name__ = true;
 src_graphics_MeshPart.prototype = {
 	__class__: src_graphics_MeshPart
 };
+var src_graphics_Texture = function(src1,cont) {
+	var _gthis = this;
+	this.img = new Image();
+	this.img.src = src1;
+	this.img.onload = function(_) {
+		src_graphics_GraphicsDevice.gl.activeTexture(33984);
+		var texture = src_graphics_GraphicsDevice.gl.createTexture();
+		src_graphics_GraphicsDevice.gl.bindTexture(3553,texture);
+		src_graphics_GraphicsDevice.gl.texImage2D(3553,0,6408,6408,5121,_gthis.img);
+		src_graphics_GraphicsDevice.gl.generateMipmap(3553);
+		_gthis.tex = texture;
+		cont(_gthis);
+	};
+};
+src_graphics_Texture.__name__ = true;
+src_graphics_Texture.prototype = {
+	setFilter: function(filter) {
+		src_graphics_GraphicsDevice.gl.bindTexture(3553,this.tex);
+		switch(filter[1]) {
+		case 0:
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10240,9729);
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10241,9729);
+			break;
+		case 1:
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10240,9728);
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10241,9728);
+			break;
+		case 2:
+			throw new js__$Boot_HaxeError("Anisotropic filter isn't implemented");
+		case 3:
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10240,9728);
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10241,9986);
+			break;
+		case 4:
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10240,9729);
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10241,9985);
+			break;
+		case 5:
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10240,9729);
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10241,9985);
+			break;
+		case 6:
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10240,9728);
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10241,9984);
+			break;
+		case 7:
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10240,9729);
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10241,9987);
+			break;
+		case 8:
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10240,9728);
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10241,9986);
+			break;
+		}
+	}
+	,setAddressMode: function(mode) {
+		src_graphics_GraphicsDevice.gl.bindTexture(3553,this.tex);
+		switch(mode[1]) {
+		case 0:
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10242,10497);
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10243,10497);
+			break;
+		case 1:
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10242,33071);
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10243,33071);
+			break;
+		case 2:
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10242,33648);
+			src_graphics_GraphicsDevice.gl.texParameteri(3553,10243,33648);
+			break;
+		}
+	}
+	,setParameterf: function(pname,param) {
+		src_graphics_GraphicsDevice.gl.bindTexture(3553,this.tex);
+		src_graphics_GraphicsDevice.gl.texParameterf(3553,pname,param);
+	}
+	,useTexture: function() {
+		src_graphics_GraphicsDevice.gl.bindTexture(3553,this.tex);
+	}
+	,__class__: src_graphics_Texture
+};
 var src_graphics_shader_Shader = function(vertexShaderSource,fragmentShaderSource) {
+	this.uniformLocations = new haxe_ds_StringMap();
 	var vertexShader = this.getShader(35633,vertexShaderSource);
 	var fragmentShader = this.getShader(35632,fragmentShaderSource);
 	this.program = this.get_gl().createProgram();
@@ -1072,7 +1280,6 @@ var src_graphics_shader_Shader = function(vertexShaderSource,fragmentShaderSourc
 	if(!this.get_gl().getProgramParameter(this.program,35714)) {
 		js_Browser.alert("Could not initialize shaders");
 	}
-	this.uniformLocations = new haxe_ds_StringMap();
 };
 src_graphics_shader_Shader.__name__ = true;
 src_graphics_shader_Shader.prototype = {
@@ -1118,6 +1325,44 @@ src_graphics_shader_Shader.prototype = {
 	}
 	,__class__: src_graphics_shader_Shader
 };
+var src_graphics_states_TextureAddressMode = { __ename__ : true, __constructs__ : ["Wrap","Clamp","Mirror"] };
+src_graphics_states_TextureAddressMode.Wrap = ["Wrap",0];
+src_graphics_states_TextureAddressMode.Wrap.toString = $estr;
+src_graphics_states_TextureAddressMode.Wrap.__enum__ = src_graphics_states_TextureAddressMode;
+src_graphics_states_TextureAddressMode.Clamp = ["Clamp",1];
+src_graphics_states_TextureAddressMode.Clamp.toString = $estr;
+src_graphics_states_TextureAddressMode.Clamp.__enum__ = src_graphics_states_TextureAddressMode;
+src_graphics_states_TextureAddressMode.Mirror = ["Mirror",2];
+src_graphics_states_TextureAddressMode.Mirror.toString = $estr;
+src_graphics_states_TextureAddressMode.Mirror.__enum__ = src_graphics_states_TextureAddressMode;
+var src_graphics_states_TextureFilter = { __ename__ : true, __constructs__ : ["Linear","Point","Anisotropic","LinearMipPoint","PointMipLinear","MinLinearMagPointMipLinear","MinLinearMagPointMipPoint","MinPointMagLinearMipLinear","MinPointMagLinearMipPoint"] };
+src_graphics_states_TextureFilter.Linear = ["Linear",0];
+src_graphics_states_TextureFilter.Linear.toString = $estr;
+src_graphics_states_TextureFilter.Linear.__enum__ = src_graphics_states_TextureFilter;
+src_graphics_states_TextureFilter.Point = ["Point",1];
+src_graphics_states_TextureFilter.Point.toString = $estr;
+src_graphics_states_TextureFilter.Point.__enum__ = src_graphics_states_TextureFilter;
+src_graphics_states_TextureFilter.Anisotropic = ["Anisotropic",2];
+src_graphics_states_TextureFilter.Anisotropic.toString = $estr;
+src_graphics_states_TextureFilter.Anisotropic.__enum__ = src_graphics_states_TextureFilter;
+src_graphics_states_TextureFilter.LinearMipPoint = ["LinearMipPoint",3];
+src_graphics_states_TextureFilter.LinearMipPoint.toString = $estr;
+src_graphics_states_TextureFilter.LinearMipPoint.__enum__ = src_graphics_states_TextureFilter;
+src_graphics_states_TextureFilter.PointMipLinear = ["PointMipLinear",4];
+src_graphics_states_TextureFilter.PointMipLinear.toString = $estr;
+src_graphics_states_TextureFilter.PointMipLinear.__enum__ = src_graphics_states_TextureFilter;
+src_graphics_states_TextureFilter.MinLinearMagPointMipLinear = ["MinLinearMagPointMipLinear",5];
+src_graphics_states_TextureFilter.MinLinearMagPointMipLinear.toString = $estr;
+src_graphics_states_TextureFilter.MinLinearMagPointMipLinear.__enum__ = src_graphics_states_TextureFilter;
+src_graphics_states_TextureFilter.MinLinearMagPointMipPoint = ["MinLinearMagPointMipPoint",6];
+src_graphics_states_TextureFilter.MinLinearMagPointMipPoint.toString = $estr;
+src_graphics_states_TextureFilter.MinLinearMagPointMipPoint.__enum__ = src_graphics_states_TextureFilter;
+src_graphics_states_TextureFilter.MinPointMagLinearMipLinear = ["MinPointMagLinearMipLinear",7];
+src_graphics_states_TextureFilter.MinPointMagLinearMipLinear.toString = $estr;
+src_graphics_states_TextureFilter.MinPointMagLinearMipLinear.__enum__ = src_graphics_states_TextureFilter;
+src_graphics_states_TextureFilter.MinPointMagLinearMipPoint = ["MinPointMagLinearMipPoint",8];
+src_graphics_states_TextureFilter.MinPointMagLinearMipPoint.toString = $estr;
+src_graphics_states_TextureFilter.MinPointMagLinearMipPoint.__enum__ = src_graphics_states_TextureFilter;
 var src_graphics_vertices_VertexDeclaration = function(vertexStride,elements) {
 	this.shaderAttributeInfo = new haxe_ds_ObjectMap();
 	if(elements == null || elements.length == 0) {
@@ -1133,22 +1378,22 @@ var src_graphics_vertices_VertexDeclaration = function(vertexStride,elements) {
 src_graphics_vertices_VertexDeclaration.__name__ = true;
 src_graphics_vertices_VertexDeclaration.prototype = {
 	getAttributeInfo: function(shader) {
-		var attrInfo = this.shaderAttributeInfo.h[shader.__id__];
-		if(attrInfo == null) {
-			attrInfo = new src_graphics_vertices__$VertexDeclaration_VertexDeclarationAttributeInfo(src_graphics_GraphicsDevice.maxVertexAttributes);
-			var _g = 0;
-			var _g1 = this.elements;
-			while(_g < _g1.length) {
-				var ve = _g1[_g];
-				++_g;
-				var attributeLocation = shader.getAttribLocation(src_graphics_GraphicsExtensions.getName(ve.usage) + (ve.usageIndex >= 1 ? "" + ve.usageIndex : ""));
-				if(attributeLocation < 0) {
-					continue;
-				}
-				attrInfo.elements.push(new src_graphics_vertices__$VertexDeclaration_Element(ve.offset,attributeLocation,src_graphics_GraphicsExtensions.numberOfElements(ve.format),src_graphics_GraphicsExtensions.vertexAttribPointerType(ve.format),src_graphics_GraphicsExtensions.vertexAttribNormalized(ve)));
-			}
-			this.shaderAttributeInfo.set(shader,attrInfo);
+		if(this.shaderAttributeInfo.h.__keys__[shader.__id__] != null) {
+			return this.shaderAttributeInfo.h[shader.__id__];
 		}
+		var attrInfo = new src_graphics_vertices__$VertexDeclaration_VertexDeclarationAttributeInfo(src_graphics_GraphicsDevice.maxVertexAttributes);
+		var _g = 0;
+		var _g1 = this.elements;
+		while(_g < _g1.length) {
+			var ve = _g1[_g];
+			++_g;
+			var attributeLocation = shader.getAttribLocation(src_graphics_GraphicsExtensions.getName(ve.usage) + (ve.usageIndex >= 1 ? "" + ve.usageIndex : ""));
+			if(attributeLocation < 0) {
+				continue;
+			}
+			attrInfo.elements.push(new src_graphics_vertices__$VertexDeclaration_Element(ve.offset,attributeLocation,src_graphics_GraphicsExtensions.numberOfElements(ve.format),src_graphics_GraphicsExtensions.vertexAttribPointerType(ve.format),src_graphics_GraphicsExtensions.vertexAttribNormalized(ve)));
+		}
+		this.shaderAttributeInfo.set(shader,attrInfo);
 		return attrInfo;
 	}
 	,apply: function(shader,offset) {
@@ -1291,27 +1536,53 @@ src_graphics_vertices_VertexElementUsage.TessellateFactor.toString = $estr;
 src_graphics_vertices_VertexElementUsage.TessellateFactor.__enum__ = src_graphics_vertices_VertexElementUsage;
 var src_graphics_vertices_VertexType = function() { };
 src_graphics_vertices_VertexType.__name__ = true;
-var src_graphics_vertices_VertexPosition = function() {
+src_graphics_vertices_VertexType.prototype = {
+	__class__: src_graphics_vertices_VertexType
+};
+var src_graphics_vertices_VertexPosition = function(position) {
+	if(src_graphics_vertices_VertexPosition.dummy == null) {
+		src_graphics_vertices_VertexPosition.dummy = this;
+		src_graphics_vertices_VertexPosition.init();
+	}
+	this.position = position;
+};
+src_graphics_vertices_VertexPosition.__name__ = true;
+src_graphics_vertices_VertexPosition.__interfaces__ = [src_graphics_vertices_VertexType];
+src_graphics_vertices_VertexPosition.init = function() {
 	var elements = [];
 	elements.push(new src_graphics_vertices_VertexElement(0,src_graphics_vertices_VertexElementFormat.Vector3,src_graphics_vertices_VertexElementUsage.Position,0));
 	src_graphics_vertices_VertexPosition.vertexDeclaration = new src_graphics_vertices_VertexDeclaration(3,elements);
 };
-src_graphics_vertices_VertexPosition.__name__ = true;
-src_graphics_vertices_VertexPosition.__interfaces__ = [src_graphics_vertices_VertexType];
 src_graphics_vertices_VertexPosition.prototype = {
-	__class__: src_graphics_vertices_VertexPosition
+	iterator: function() {
+		return HxOverrides.iter([this.position]);
+	}
+	,__class__: src_graphics_vertices_VertexPosition
 };
-var src_graphics_vertices_VertexPositionNormalTexture = function() {
+var src_graphics_vertices_VertexPositionNormalTexture = function(position,normal,textureCoordinate) {
+	if(src_graphics_vertices_VertexPositionNormalTexture.dummy == null) {
+		src_graphics_vertices_VertexPositionNormalTexture.dummy = this;
+		src_graphics_vertices_VertexPositionNormalTexture.init();
+	}
+	this.position = position;
+	this.normal = normal;
+	this.textureCoordinate = textureCoordinate;
+};
+src_graphics_vertices_VertexPositionNormalTexture.__name__ = true;
+src_graphics_vertices_VertexPositionNormalTexture.__interfaces__ = [src_graphics_vertices_VertexType];
+src_graphics_vertices_VertexPositionNormalTexture.init = function() {
 	var elements = [];
 	elements.push(new src_graphics_vertices_VertexElement(0,src_graphics_vertices_VertexElementFormat.Vector3,src_graphics_vertices_VertexElementUsage.Position,0));
 	elements.push(new src_graphics_vertices_VertexElement(12,src_graphics_vertices_VertexElementFormat.Vector3,src_graphics_vertices_VertexElementUsage.Normal,0));
 	elements.push(new src_graphics_vertices_VertexElement(24,src_graphics_vertices_VertexElementFormat.Vector2,src_graphics_vertices_VertexElementUsage.TextureCoordinate,0));
 	src_graphics_vertices_VertexPositionNormalTexture.vertexDeclaration = new src_graphics_vertices_VertexDeclaration(null,elements);
 };
-src_graphics_vertices_VertexPositionNormalTexture.__name__ = true;
-src_graphics_vertices_VertexPositionNormalTexture.__interfaces__ = [src_graphics_vertices_VertexType];
 src_graphics_vertices_VertexPositionNormalTexture.prototype = {
-	__class__: src_graphics_vertices_VertexPositionNormalTexture
+	iterator: function() {
+		var array = [this.position,this.normal,this.textureCoordinate];
+		return HxOverrides.iter(array);
+	}
+	,__class__: src_graphics_vertices_VertexPositionNormalTexture
 };
 var src_math__$Mat4_Mat4_$Impl_$ = {};
 src_math__$Mat4_Mat4_$Impl_$.__name__ = true;
@@ -1443,7 +1714,10 @@ var src_math_Mat4Data = function(m) {
 };
 src_math_Mat4Data.__name__ = true;
 src_math_Mat4Data.prototype = {
-	__class__: src_math_Mat4Data
+	iterator: function() {
+		return HxOverrides.iter(this.m);
+	}
+	,__class__: src_math_Mat4Data
 };
 var src_math__$Vec2_Vec2_$Impl_$ = {};
 src_math__$Vec2_Vec2_$Impl_$.__name__ = true;
@@ -1483,7 +1757,10 @@ var src_math_Vec2Data = function(x,y) {
 };
 src_math_Vec2Data.__name__ = true;
 src_math_Vec2Data.prototype = {
-	__class__: src_math_Vec2Data
+	iterator: function() {
+		return HxOverrides.iter([this.x,this.y]);
+	}
+	,__class__: src_math_Vec2Data
 };
 var src_math__$Vec3_Vec3_$Impl_$ = {};
 src_math__$Vec3_Vec3_$Impl_$.__name__ = true;
@@ -1525,7 +1802,110 @@ var src_math_Vec3Data = function(x,y,z) {
 };
 src_math_Vec3Data.__name__ = true;
 src_math_Vec3Data.prototype = {
-	__class__: src_math_Vec3Data
+	iterator: function() {
+		return HxOverrides.iter([this.x,this.y,this.z]);
+	}
+	,__class__: src_math_Vec3Data
+};
+var src_parser_Lexer = function(tokenTypeList,text) {
+	this.offset = 0;
+	this.text = "";
+	this.tokenTypeList = tokenTypeList;
+};
+src_parser_Lexer.__name__ = true;
+src_parser_Lexer.prototype = {
+	skipWhiteSpace: function(text) {
+		var first = text.charAt(0);
+		while(first == " " || first == "\n" || first == "\t") {
+			text = HxOverrides.substr(text,1,null);
+			first = text.charAt(0);
+		}
+		return text;
+	}
+	,skipComment: function(text) {
+		var first = text.charAt(0);
+		if(first == "/") {
+			if(text.charAt(1) == "/") {
+				while(first != "\n") {
+					text = HxOverrides.substr(text,1,null);
+					first = text.charAt(0);
+				}
+			} else if(text.charAt(1) == "*") {
+				var second = text.charAt(1);
+				while(!(first == "*" && second == "/")) {
+					text = HxOverrides.substr(text,1,null);
+					first = text.charAt(0);
+					second = text.charAt(1);
+				}
+				text = HxOverrides.substr(text,2,null);
+			}
+		}
+		return text;
+	}
+	,nextToken: function() {
+		if(this.text == "") {
+			return null;
+		}
+		var word = "";
+		var token = new src_parser_Token(null,this.offset,0,"");
+		var length = this.text.length;
+		while(true) {
+			this.text = this.skipComment(this.text);
+			this.text = this.skipWhiteSpace(this.text);
+			if(!(this.text.length != length)) {
+				break;
+			}
+		}
+		var _g1 = 0;
+		var _g = length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			var isMatched = false;
+			var isMatchedWithNextChar = false;
+			var nextChar = this.text.charAt(0);
+			var _g2_head = this.tokenTypeList.h;
+			while(_g2_head != null) {
+				var val = _g2_head.item;
+				_g2_head = _g2_head.next;
+				var tokenType = val;
+				if(tokenType.regExp.match(word)) {
+					isMatched = true;
+					if(tokenType.regExp.match(word + nextChar)) {
+						isMatchedWithNextChar = true;
+					} else {
+						token.kind = tokenType.kind;
+						token.offsetEnd = this.offset + i;
+						token.lexeme = word;
+					}
+				}
+			}
+			if(isMatched && !isMatchedWithNextChar) {
+				break;
+			}
+			this.text = HxOverrides.substr(this.text,1,null);
+			word += nextChar;
+		}
+		this.offset = token.offsetEnd;
+		return token;
+	}
+	,__class__: src_parser_Lexer
+};
+var src_parser_MQOParser = function() { };
+src_parser_MQOParser.__name__ = true;
+var src_parser_Token = function(kind,offsetBegin,offsetEnd,lexeme) {
+	this.kind = kind;
+	this.offsetBegin = offsetBegin;
+	this.offsetEnd = offsetEnd;
+	this.lexeme = lexeme;
+};
+src_parser_Token.__name__ = true;
+src_parser_Token.prototype = {
+	__class__: src_parser_Token
+};
+var src_parser_TokenType = function() { };
+src_parser_TokenType.__name__ = true;
+src_parser_TokenType.prototype = {
+	__class__: src_parser_TokenType
 };
 var src_scene_Scene = function() {
 	this.camera = new src_camera_Camera();
@@ -1545,6 +1925,9 @@ src_scene_Scene.prototype = {
 	}
 	,__class__: src_scene_Scene
 };
+function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; }
+var $_, $fid = 0;
+function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
 String.prototype.__class__ = String;
 String.__name__ = true;
 Array.__name__ = true;
@@ -1575,5 +1958,8 @@ haxe_io_FPHelper.helper = new DataView(new ArrayBuffer(8));
 js_Boot.__toStr = ({ }).toString;
 js_html_compat_Float32Array.BYTES_PER_ELEMENT = 4;
 js_html_compat_Uint8Array.BYTES_PER_ELEMENT = 1;
+src_graphics_Texture.rc = WebGLRenderingContext;
+src_graphics_vertices_VertexPosition.dummy = new src_graphics_vertices_VertexPosition(null);
+src_graphics_vertices_VertexPositionNormalTexture.dummy = new src_graphics_vertices_VertexPositionNormalTexture(null,null,null);
 src_Game.main();
 })(typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);

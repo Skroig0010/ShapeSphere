@@ -8,4 +8,8 @@ class Vec2Data{
         this.x = x;
         this.y = y;
     }
+
+    public inline function iterator(){
+        return [this.x, this.y].iterator();
+    }
 }

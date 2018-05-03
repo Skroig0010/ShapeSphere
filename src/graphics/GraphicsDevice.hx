@@ -65,6 +65,10 @@ class GraphicsDevice{
         gl.vertexAttribPointer(location, size, pointerType, normalized, stride, offset);
     }
 
+    public function uniform1i(location : UniformLocation, x : Int){
+        gl.uniform1i(location, x);
+    }
+
     public function uniformMatrix4fv(location : UniformLocation, matrix : Array<Float>){
         gl.uniformMatrix4fv(location, false, matrix);
     }

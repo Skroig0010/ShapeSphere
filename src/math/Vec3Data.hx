@@ -10,4 +10,8 @@ class Vec3Data{
         this.y = y;
         this.z = z;
     }
+
+    public inline function iterator(){
+        return [this.x, this.y, this.z].iterator();
+    }
 }

@@ -1,6 +1,5 @@
 package src.graphics;
 import js.html.webgl.RenderingContext;
-import js.html.webgl.Texture;
 import js.html.webgl.UniformLocation;
 import src.graphics.GraphicsDevice;
 import src.graphics.shader.Shader;
@@ -22,6 +21,7 @@ class Material{
     var transMatrixLocation : UniformLocation;
     var viewMatrixLocation : UniformLocation;
     var projMatrixLocation : UniformLocation;
+    var textureLocation : UniformLocation;
 
 
     public function new(gd:GraphicsDevice, shader:Shader, col:Color, dif:Float, amb:Float, spc:Float, tex:Texture){
@@ -37,10 +37,18 @@ class Material{
         transMatrixLocation = shader.getUniformLocation("transMatrix");
         viewMatrixLocation = shader.getUniformLocation("viewMatrix");
         projMatrixLocation = shader.getUniformLocation("projMatrix");
+        if(tex != null){
+            textureLocation = shader.getUniformLocation("texture");
+        }
     }
 
     public function apply(scene : Scene){
         shader.useProgram();
+        // Textureがあれば設定
+        if(tex != null){
+            tex.useTexture();
+            gd.uniform1i(textureLocation, 0);
+        }
 
         // Uniform変数の設定
         gd.uniformMatrix4fv(transMatrixLocation, Mat4.identity);

@@ -1,8 +1,12 @@
 package src;
 import src.graphics.*;
+import src.graphics.states.*;
 import src.graphics.shader.*;
+import src.graphics.vertices.*;
 import src.math.*;
 import src.scene.Scene;
+
+using Lambda;
 
 class Game{
     static public var gd : GraphicsDevice;
@@ -21,9 +25,17 @@ class Game{
         var frag = js.Browser.window.fetch("main.frag").then(function (response){
             return response.text();
         });
-        js.Promise.all([vert, frag]).then(function (response){
+        var mqo = js.Browser.window.fetch("sample.mqo").then(function (response){
+            return response.text();
+        });
+        var tex = new js.Promise(function(resolve, reject){
+            new Texture("sample.png", resolve); 
+        });
+
+        js.Promise.all([vert, frag, tex]).then(function (response){
             var vert = cast (response[0], String);
             var frag = cast (response[1], String);
+            var tex = cast (response[2], Texture);
 
             var shader = new Shader(vert, frag);
 
@@ -31,22 +43,22 @@ class Game{
             var eye = new Vec3(0, 0.4, 1);
             scene.setCamera(eye, eye.normalize(), new Vec3(0, 1, 0));
 
-            var mat = new Material(gd, shader, Color.Red, 0.0, 0.0, 0.0, null);
-            // 必要な初期化だった。仕方がなかった。
-            new src.graphics.vertices.VertexPositionNormalTexture();
-            var vertices:Array<Float> = [
-                0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                0.5, 0.0, 0.5, 0.0, 0.0, 0.0, 1.0, 0.0,
-                -0.5, 0.0, -0.5, 0.0, 0.0, 0.0, 0.0, 1.0];
+            tex.setFilter(TextureFilter.Point);
+            var mat = new Material(gd, shader, Color.Red, 0.0, 0.0, 0.0, tex);
+
+            var vertices : Array<Float> = [
+                new VertexPositionNormalTexture(new Vec3(0.0, 0.5, 0.0), new Vec3(0.0, 0.0, 0.0), new Vec2(0.0, 0.0)), 
+                new VertexPositionNormalTexture(new Vec3(0.5, 0.0, 0.5), new Vec3(0.0, 0.0, 0.0), new Vec2(1.0, 0.0)), 
+                new VertexPositionNormalTexture(new Vec3(-0.5, 0.0, -0.5), new Vec3(0.0, 0.0, 0.0), new Vec2(0.0, 1.0)),].flatten().flatten().array();
 
             mesh = new Mesh(gd, scene, vertices, [0,1,2]);
             var meshpart = new MeshPart(gd, mat, 3, 0, mesh);
             mesh.meshParts.add(meshpart);
 
             var vertices2:Array<Float> = [
-                0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                0.5, 0.0, -0.5, 0.0, 0.0, 0.0, 0.0, 1.0,
-                -0.5, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0];
+                new VertexPositionNormalTexture(new Vec3(0.0, 0.5, 0.0), new Vec3(0.0, 0.0, 0.0), new Vec2(0.0, 0.0)), 
+                new VertexPositionNormalTexture(new Vec3(0.5, 0.0, -0.5), new Vec3(0.0, 0.0, 0.0), new Vec2(0.0, 1.0)), 
+                new VertexPositionNormalTexture(new Vec3(-0.5, 0.0, 0.5), new Vec3(0.0, 0.0, 0.0), new Vec2(1.0, 1.0)),].flatten().flatten().array();
 
             mesh2 = new Mesh(gd, scene, vertices2, [0,1,2]);
             var meshpart2 = new MeshPart(gd, mat, 3, 0, mesh2);

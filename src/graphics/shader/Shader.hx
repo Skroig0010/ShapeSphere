@@ -5,7 +5,8 @@ import js.html.webgl.*;
 class Shader{
     var program : Program;
     var gl(get, never) : RenderingContext;
-    var uniformLocations : Map<String, UniformLocation>;
+    var uniformLocations = new Map<String, UniformLocation>();
+
 
     function get_gl(){
         return GraphicsDevice.gl;
@@ -26,7 +27,6 @@ class Shader{
                     program, RenderingContext.LINK_STATUS)) {
             js.Browser.alert('Could not initialize shaders');
         }
-        uniformLocations = new Map<String, UniformLocation>();
     }
 
     public function getAttribLocation(name : String){

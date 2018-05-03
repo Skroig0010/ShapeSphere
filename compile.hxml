@@ -2,14 +2,21 @@
 -main src.Game
 src.camera.Camera
 
+src.content.ContentManager
+src.content.contentreaders.ModelReader
+
 src.graphics.Color
 src.graphics.GraphicsDevice
 src.graphics.GraphicsExtensions
 src.graphics.Material
 src.graphics.Mesh
 src.graphics.MeshPart
+src.graphics.Texture
 
 src.graphics.shader.Shader
+
+src.graphics.states.TextureAddressMode
+src.graphics.states.TextureFilter
 
 src.graphics.vertices.VertexType
 src.graphics.vertices.VertexDeclaration
@@ -26,6 +33,11 @@ src.math.Vec3
 src.math.Vec3Data
 src.math.Mat4
 src.math.Mat4Data
+
+src.parser.MQOParser
+src.parser.Lexer
+src.parser.Token
+src.parser.TokenType
 
 src.scene.Scene
 -js build/Game.js

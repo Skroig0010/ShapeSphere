@@ -15,4 +15,7 @@ class Mat4Data{
         };
     }
 
+    public inline function iterator(){
+        return m.iterator();
+    }
 }

@@ -21,25 +21,26 @@ class VertexDeclaration {
     }
 
     function getAttributeInfo(shader : Shader){
-        var attrInfo = shaderAttributeInfo[shader];
-        if(attrInfo == null){
-            attrInfo = new VertexDeclarationAttributeInfo(GraphicsDevice.maxVertexAttributes);
-            for(ve in elements){
-                // 0は無視され、1以降が名前に加わる
-                var attributeLocation = shader.getAttribLocation(ve.usage.getName() + if(ve.usageIndex >= 1) "" + ve.usageIndex else "");
-                if(attributeLocation < 0) 
-                    continue;
-
-                attrInfo.elements.push(new Element(ve.offset, attributeLocation, ve.format.numberOfElements(), ve.format.vertexAttribPointerType(), ve.vertexAttribNormalized()));
-            }
-
-            shaderAttributeInfo[shader] = attrInfo;
+        if(shaderAttributeInfo.exists(shader)){
+            return shaderAttributeInfo[shader];
         }
+        var attrInfo = new VertexDeclarationAttributeInfo(GraphicsDevice.maxVertexAttributes);
+        for(ve in elements){
+            // 0は無視され、1以降が名前に加わる
+            var attributeLocation = shader.getAttribLocation(ve.usage.getName() + if(ve.usageIndex >= 1) "" + ve.usageIndex else "");
+            if(attributeLocation < 0) 
+                continue;
+
+            attrInfo.elements.push(new Element(ve.offset, attributeLocation, ve.format.numberOfElements(), ve.format.vertexAttribPointerType(), ve.vertexAttribNormalized()));
+        }
+
+        shaderAttributeInfo[shader] = attrInfo;
         return attrInfo;
     }
 
     public function apply(shader : Shader, offset : Int){
         var attrInfo = getAttributeInfo(shader);
+        // 必要な初期化だった。仕方がなかった。
         for(element in attrInfo.elements){
             gd.vertexAttribPointer(element.attributeLocation,
                     element.numberOfElements,
