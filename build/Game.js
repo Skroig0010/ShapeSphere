@@ -7,7 +7,9 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
-var EReg = function() { };
+var EReg = function(r,opt) {
+	this.r = new RegExp(r,opt.split("u").join(""));
+};
 EReg.__name__ = true;
 EReg.prototype = {
 	match: function(s) {
@@ -22,17 +24,12 @@ EReg.prototype = {
 };
 var HxOverrides = function() { };
 HxOverrides.__name__ = true;
-HxOverrides.substr = function(s,pos,len) {
-	if(len == null) {
-		len = s.length;
-	} else if(len < 0) {
-		if(pos == 0) {
-			len = s.length + len;
-		} else {
-			return "";
-		}
+HxOverrides.cca = function(s,index) {
+	var x = s.charCodeAt(index);
+	if(x != x) {
+		return undefined;
 	}
-	return s.substr(pos,len);
+	return x;
 };
 HxOverrides.iter = function(a) {
 	return { cur : 0, arr : a, hasNext : function() {
@@ -70,6 +67,16 @@ var Std = function() { };
 Std.__name__ = true;
 Std.string = function(s) {
 	return js_Boot.__string_rec(s,"");
+};
+Std.parseInt = function(x) {
+	var v = parseInt(x,10);
+	if(v == 0 && (HxOverrides.cca(x,1) == 120 || HxOverrides.cca(x,1) == 88)) {
+		v = parseInt(x);
+	}
+	if(isNaN(v)) {
+		return null;
+	}
+	return v;
 };
 var haxe_IMap = function() { };
 haxe_IMap.__name__ = true;
@@ -760,10 +767,13 @@ src_Game.main = function() {
 	var tex = new Promise(function(resolve,reject) {
 		new src_graphics_Texture("sample.png",resolve);
 	});
-	Promise.all([vert,frag,tex]).then(function(response3) {
+	Promise.all([vert,frag,tex,mqo]).then(function(response3) {
 		var vert1 = js_Boot.__cast(response3[0] , String);
 		var frag1 = js_Boot.__cast(response3[1] , String);
 		var tex1 = js_Boot.__cast(response3[2] , src_graphics_Texture);
+		var mqo1 = js_Boot.__cast(response3[3] , String);
+		var parser = new src_parser_MqoParser(mqo1,src_Game.gd);
+		var x = parser.getMqo();
 		var shader = new src_graphics_shader_Shader(vert1,frag1);
 		src_Game.scene = new src_scene_Scene();
 		var this1 = new src_math_Vec3Data(0,0.4,1);
@@ -1584,6 +1594,29 @@ src_graphics_vertices_VertexPositionNormalTexture.prototype = {
 	}
 	,__class__: src_graphics_vertices_VertexPositionNormalTexture
 };
+var src_graphics_vertices_VertexPositionTexture = function(position,textureCoordinate) {
+	if(src_graphics_vertices_VertexPositionTexture.dummy == null) {
+		src_graphics_vertices_VertexPositionTexture.dummy = this;
+		src_graphics_vertices_VertexPositionTexture.init();
+	}
+	this.position = position;
+	this.textureCoordinate = textureCoordinate;
+};
+src_graphics_vertices_VertexPositionTexture.__name__ = true;
+src_graphics_vertices_VertexPositionTexture.__interfaces__ = [src_graphics_vertices_VertexType];
+src_graphics_vertices_VertexPositionTexture.init = function() {
+	var elements = [];
+	elements.push(new src_graphics_vertices_VertexElement(0,src_graphics_vertices_VertexElementFormat.Vector3,src_graphics_vertices_VertexElementUsage.Position,0));
+	elements.push(new src_graphics_vertices_VertexElement(12,src_graphics_vertices_VertexElementFormat.Vector2,src_graphics_vertices_VertexElementUsage.TextureCoordinate,0));
+	src_graphics_vertices_VertexPositionTexture.vertexDeclaration = new src_graphics_vertices_VertexDeclaration(null,elements);
+};
+src_graphics_vertices_VertexPositionTexture.prototype = {
+	iterator: function() {
+		var array = [this.position,this.textureCoordinate];
+		return HxOverrides.iter(array);
+	}
+	,__class__: src_graphics_vertices_VertexPositionTexture
+};
 var src_math__$Mat4_Mat4_$Impl_$ = {};
 src_math__$Mat4_Mat4_$Impl_$.__name__ = true;
 src_math__$Mat4_Mat4_$Impl_$.get_identity = function() {
@@ -1807,106 +1840,382 @@ src_math_Vec3Data.prototype = {
 	}
 	,__class__: src_math_Vec3Data
 };
-var src_parser_Lexer = function(tokenTypeList,text) {
-	this.offset = 0;
-	this.text = "";
-	this.tokenTypeList = tokenTypeList;
+var src_parser_Mqo = function(scene,mesh,meshParts,materials) {
+	this.scene = scene;
+	this.mesh = mesh;
+	this.meshParts = meshParts;
+	this.materials = materials;
 };
-src_parser_Lexer.__name__ = true;
-src_parser_Lexer.prototype = {
-	skipWhiteSpace: function(text) {
-		var first = text.charAt(0);
-		while(first == " " || first == "\n" || first == "\t") {
-			text = HxOverrides.substr(text,1,null);
-			first = text.charAt(0);
-		}
-		return text;
+src_parser_Mqo.__name__ = true;
+src_parser_Mqo.prototype = {
+	__class__: src_parser_Mqo
+};
+var src_parser_MqoLexer = function(text) {
+	this.text = text;
+	this.length = text.length;
+	this.counter = 0;
+	this.moveNext();
+};
+src_parser_MqoLexer.__name__ = true;
+src_parser_MqoLexer.prototype = {
+	getToken: function() {
+		return this.token;
 	}
-	,skipComment: function(text) {
-		var first = text.charAt(0);
-		if(first == "/") {
-			if(text.charAt(1) == "/") {
-				while(first != "\n") {
-					text = HxOverrides.substr(text,1,null);
-					first = text.charAt(0);
-				}
-			} else if(text.charAt(1) == "*") {
-				var second = text.charAt(1);
-				while(!(first == "*" && second == "/")) {
-					text = HxOverrides.substr(text,1,null);
-					first = text.charAt(0);
-					second = text.charAt(1);
-				}
-				text = HxOverrides.substr(text,2,null);
+	,moveNext: function() {
+		while(this.length > this.counter) {
+			var _g = this.text.charAt(this.counter);
+			switch(_g) {
+			case "\t":case "\n":case "\r":case " ":
+				this.counter++;
+				continue;
+			case "\"":
+				this.token = this.getString();
+				return true;
+			case "(":
+				this.counter++;
+				this.token = src_parser_MqoVal.LParen;
+				return true;
+			case ")":
+				this.counter++;
+				this.token = src_parser_MqoVal.RParen;
+				return true;
+			case "-":case "0":case "1":case "2":case "3":case "4":case "5":case "6":case "7":case "8":case "9":
+				this.token = this.getNumber();
+				return true;
+			case "{":
+				this.counter++;
+				this.token = src_parser_MqoVal.LBrace;
+				return true;
+			case "}":
+				this.counter++;
+				this.token = src_parser_MqoVal.RBrace;
+				return true;
+			default:
+				this.token = this.getSymbol();
+				return true;
 			}
 		}
-		return text;
+		this.token = null;
+		return false;
 	}
-	,nextToken: function() {
-		if(this.text == "") {
+	,getString: function() {
+		if(this.text.charAt(this.counter) != "\"") {
 			return null;
 		}
-		var word = "";
-		var token = new src_parser_Token(null,this.offset,0,"");
-		var length = this.text.length;
-		while(true) {
-			this.text = this.skipComment(this.text);
-			this.text = this.skipWhiteSpace(this.text);
-			if(!(this.text.length != length)) {
-				break;
-			}
-		}
-		var _g1 = 0;
-		var _g = length;
-		while(_g1 < _g) {
-			var i = _g1++;
-			var isMatched = false;
-			var isMatchedWithNextChar = false;
-			var nextChar = this.text.charAt(0);
-			var _g2_head = this.tokenTypeList.h;
-			while(_g2_head != null) {
-				var val = _g2_head.item;
-				_g2_head = _g2_head.next;
-				var tokenType = val;
-				if(tokenType.regExp.match(word)) {
-					isMatched = true;
-					if(tokenType.regExp.match(word + nextChar)) {
-						isMatchedWithNextChar = true;
-					} else {
-						token.kind = tokenType.kind;
-						token.offsetEnd = this.offset + i;
-						token.lexeme = word;
-					}
+		var s = "";
+		var prevChar = "";
+		this.counter++;
+		while(this.length > this.counter) {
+			if(this.text.charAt(this.counter) == "\"") {
+				if(prevChar != "\\") {
+					break;
 				}
 			}
-			if(isMatched && !isMatchedWithNextChar) {
+			prevChar = this.text.charAt(this.counter);
+			s += prevChar;
+			this.counter++;
+		}
+		if(this.text.charAt(this.counter) != "\"") {
+			return null;
+		}
+		this.counter++;
+		return src_parser_MqoVal.StringVal(s);
+	}
+	,getNumber: function() {
+		var number = this.text.charAt(this.counter);
+		var isNegative = false;
+		var isFloat = false;
+		var reg = new EReg("[0-9]|\\.","");
+		if(number == "-") {
+			isNegative = true;
+			number = "";
+		} else if(!reg.match(number)) {
+			return null;
+		}
+		this.counter++;
+		while(this.length > this.counter) {
+			if(!reg.match(this.text.charAt(this.counter))) {
 				break;
 			}
-			this.text = HxOverrides.substr(this.text,1,null);
-			word += nextChar;
+			if(this.text.charAt(this.counter) == ".") {
+				isFloat = true;
+			}
+			number += this.text.charAt(this.counter);
+			this.counter++;
 		}
-		this.offset = token.offsetEnd;
-		return token;
+		if(isFloat) {
+			var f = parseFloat(number);
+			if(isNaN(f)) {
+				return null;
+			}
+			if(isNegative) {
+				f = -f;
+			}
+			return src_parser_MqoVal.FloatVal(f);
+		} else {
+			var i = Std.parseInt(number);
+			if(i == null) {
+				return null;
+			}
+			if(isNegative) {
+				i = -i;
+			}
+			return src_parser_MqoVal.IntVal(i);
+		}
 	}
-	,__class__: src_parser_Lexer
+	,getSymbol: function() {
+		var symbol = this.text.charAt(this.counter);
+		this.counter++;
+		_hx_loop1: while(this.length > this.counter) {
+			var _g = this.text.charAt(this.counter);
+			switch(_g) {
+			case "\t":case "\n":case "\r":case " ":case "(":case ")":
+				break _hx_loop1;
+			default:
+				symbol += this.text.charAt(this.counter);
+				this.counter++;
+			}
+		}
+		return src_parser_MqoVal.Symbol(symbol);
+	}
+	,__class__: src_parser_MqoLexer
 };
-var src_parser_MQOParser = function() { };
-src_parser_MQOParser.__name__ = true;
-var src_parser_Token = function(kind,offsetBegin,offsetEnd,lexeme) {
-	this.kind = kind;
-	this.offsetBegin = offsetBegin;
-	this.offsetEnd = offsetEnd;
-	this.lexeme = lexeme;
+var src_parser_MqoParser = function(text,gd) {
+	this.lexer = new src_parser_MqoLexer(text);
+	this.gd = gd;
 };
-src_parser_Token.__name__ = true;
-src_parser_Token.prototype = {
-	__class__: src_parser_Token
+src_parser_MqoParser.__name__ = true;
+src_parser_MqoParser.prototype = {
+	getMqo: function() {
+		var scene = new src_scene_Scene();
+		var meshParts = [];
+		var materials = [];
+		if(!(this.eatSymbol("Metasequoia") && this.eatSymbol("Document") && this.eatSymbol("Format") && this.eatSymbol("Text") && this.eatSymbol("Ver") && this.eatFloat())) {
+			throw new js__$Boot_HaxeError("invalid header");
+		}
+		while(true) {
+			var _g = this.lexer.getToken();
+			if(_g[1] == 0) {
+				if(_g[2] == "Scene") {
+					scene = this.getScene();
+				}
+			}
+			if(!this.lexer.moveNext()) {
+				break;
+			}
+		}
+		var mesh = this.getMesh(scene,null,null);
+		return new src_parser_Mqo(scene,mesh,meshParts,materials);
+	}
+	,getScene: function() {
+		var this1 = new src_math_Vec3Data(0,0,0);
+		var position = this1;
+		var this2 = new src_math_Vec3Data(0,0,0);
+		var lookat = this2;
+		var this3 = new src_math_Vec3Data(0,0,0);
+		var up = this3;
+		try {
+			this.eatSymbol("Scene");
+			var _g = this.lexer.getToken();
+			if(_g[1] == 6) {
+				this.lexer.moveNext();
+			} else {
+				throw new js__$Boot_HaxeError("Next to Scene must be {");
+			}
+			_hx_loop1: while(this.lexer.moveNext()) {
+				var _g1 = this.lexer.getToken();
+				switch(_g1[1]) {
+				case 0:
+					switch(_g1[2]) {
+					case "dirlights":
+						this.skipChunk();
+						break;
+					case "head":
+						this.eatSymbol("head");
+						var t = this.getFloat();
+						var s = Math.sin(t);
+						var c = Math.cos(t);
+						var this4 = new src_math_Mat4Data([c,0,s,0,0,1,0,0,-s,0,c,0,0,0,0,1]);
+						var head = this4;
+						this.eatSymbol("pich");
+						var t1 = this.getFloat();
+						var s1 = Math.sin(t1);
+						var c1 = Math.cos(t1);
+						var this5 = new src_math_Mat4Data([1,0,0,0,0,c1,-s1,0,0,s1,c1,0,0,0,0,1]);
+						var pich = this5;
+						this.eatSymbol("bank");
+						var t2 = this.getFloat();
+						var s2 = Math.sin(t2);
+						var c2 = Math.cos(t2);
+						var this6 = new src_math_Mat4Data([c2,-s2,0,0,s2,c2,0,0,0,0,1,0,0,0,0,1]);
+						var bank = this6;
+						var this7 = new src_math_Vec3Data(0,1,0);
+						up = this7;
+						break;
+					case "lookat":
+						this.eatSymbol("lookat");
+						lookat = this.getVec3();
+						break;
+					case "pos":
+						this.eatSymbol("pos");
+						position = this.getVec3();
+						break;
+					default:
+						continue;
+					}
+					break;
+				case 7:
+					break _hx_loop1;
+				default:
+					continue;
+				}
+			}
+		} catch( msg ) {
+			if (msg instanceof js__$Boot_HaxeError) msg = msg.val;
+			if( js_Boot.__instanceof(msg,String) ) {
+				console.log("MqoParser.hx:76:","error : " + msg);
+			} else throw(msg);
+		}
+		var scene = new src_scene_Scene();
+		var this8 = new src_math_Vec3Data(lookat.x - position.x,lookat.y - position.y,lookat.z - position.z);
+		scene.setCamera(position,this8,up);
+		return scene;
+	}
+	,skipChunk: function() {
+		var counter = 0;
+		while(this.lexer.moveNext()) {
+			var _g = this.lexer.getToken();
+			if(_g[1] == 6) {
+				++counter;
+			}
+			var _g1 = this.lexer.getToken();
+			if(_g1[1] == 7) {
+				--counter;
+				if(counter == 0) {
+					break;
+				}
+			}
+		}
+		return this.lexer.moveNext();
+	}
+	,getFloat: function() {
+		var _g = this.lexer.getToken();
+		if(_g[1] == 2) {
+			var f = _g[2];
+			this.lexer.moveNext();
+			return f;
+		} else {
+			throw new js__$Boot_HaxeError("Float cannot found. You found " + Std.string(this.lexer.getToken()));
+		}
+	}
+	,getVec3: function() {
+		var x;
+		var _g = this.lexer.getToken();
+		switch(_g[1]) {
+		case 1:
+			var i = _g[2];
+			x = i;
+			break;
+		case 2:
+			var f = _g[2];
+			x = f;
+			break;
+		default:
+			throw new js__$Boot_HaxeError("vec3 parameters must be numbers");
+		}
+		this.lexer.moveNext();
+		var y;
+		var _g1 = this.lexer.getToken();
+		switch(_g1[1]) {
+		case 1:
+			var i1 = _g1[2];
+			y = i1;
+			break;
+		case 2:
+			var f1 = _g1[2];
+			y = f1;
+			break;
+		default:
+			throw new js__$Boot_HaxeError("vec3 parameters must be numbers");
+		}
+		this.lexer.moveNext();
+		var z;
+		var _g2 = this.lexer.getToken();
+		switch(_g2[1]) {
+		case 1:
+			var i2 = _g2[2];
+			z = i2;
+			break;
+		case 2:
+			var f2 = _g2[2];
+			z = f2;
+			break;
+		default:
+			throw new js__$Boot_HaxeError("vec3 parameters must be numbers");
+		}
+		var this1 = new src_math_Vec3Data(x,y,z);
+		return this1;
+	}
+	,getMesh: function(scene,vertices,indices) {
+		return new src_graphics_Mesh(this.gd,scene,vertices,indices);
+	}
+	,getMaterial: function() {
+		return new src_graphics_Material(this.gd,null,null,0.0,0.0,0.0,null);
+	}
+	,getMeshPart: function(material,parent) {
+		return new src_graphics_MeshPart(this.gd,material,0,0,parent);
+	}
+	,eatSymbol: function(s) {
+		var _g = this.lexer.getToken();
+		if(_g[1] == 0) {
+			var x = _g[2];
+			if(s == null || x == s) {
+				this.lexer.moveNext();
+				return true;
+			} else {
+				console.log("MqoParser.hx:145:","Missing eat Symbol(" + s + "). you have to eat " + Std.string(this.lexer.getToken()));
+				return false;
+			}
+		} else {
+			console.log("MqoParser.hx:145:","Missing eat Symbol(" + s + "). you have to eat " + Std.string(this.lexer.getToken()));
+			return false;
+		}
+	}
+	,eatFloat: function(f) {
+		var _g = this.lexer.getToken();
+		if(_g[1] == 2) {
+			var x = _g[2];
+			if(f == null || x == f) {
+				this.lexer.moveNext();
+				return true;
+			} else {
+				console.log("MqoParser.hx:156:","Missing eat Float(" + f + "). you have to eat " + Std.string(this.lexer.getToken()));
+				return false;
+			}
+		} else {
+			console.log("MqoParser.hx:156:","Missing eat Float(" + f + "). you have to eat " + Std.string(this.lexer.getToken()));
+			return false;
+		}
+	}
+	,__class__: src_parser_MqoParser
 };
-var src_parser_TokenType = function() { };
-src_parser_TokenType.__name__ = true;
-src_parser_TokenType.prototype = {
-	__class__: src_parser_TokenType
-};
+var src_parser_MqoVal = { __ename__ : true, __constructs__ : ["Symbol","IntVal","FloatVal","StringVal","LParen","RParen","LBrace","RBrace"] };
+src_parser_MqoVal.Symbol = function(s) { var $x = ["Symbol",0,s]; $x.__enum__ = src_parser_MqoVal; $x.toString = $estr; return $x; };
+src_parser_MqoVal.IntVal = function(i) { var $x = ["IntVal",1,i]; $x.__enum__ = src_parser_MqoVal; $x.toString = $estr; return $x; };
+src_parser_MqoVal.FloatVal = function(f) { var $x = ["FloatVal",2,f]; $x.__enum__ = src_parser_MqoVal; $x.toString = $estr; return $x; };
+src_parser_MqoVal.StringVal = function(s) { var $x = ["StringVal",3,s]; $x.__enum__ = src_parser_MqoVal; $x.toString = $estr; return $x; };
+src_parser_MqoVal.LParen = ["LParen",4];
+src_parser_MqoVal.LParen.toString = $estr;
+src_parser_MqoVal.LParen.__enum__ = src_parser_MqoVal;
+src_parser_MqoVal.RParen = ["RParen",5];
+src_parser_MqoVal.RParen.toString = $estr;
+src_parser_MqoVal.RParen.__enum__ = src_parser_MqoVal;
+src_parser_MqoVal.LBrace = ["LBrace",6];
+src_parser_MqoVal.LBrace.toString = $estr;
+src_parser_MqoVal.LBrace.__enum__ = src_parser_MqoVal;
+src_parser_MqoVal.RBrace = ["RBrace",7];
+src_parser_MqoVal.RBrace.toString = $estr;
+src_parser_MqoVal.RBrace.__enum__ = src_parser_MqoVal;
 var src_scene_Scene = function() {
 	this.camera = new src_camera_Camera();
 };
@@ -1961,5 +2270,6 @@ js_html_compat_Uint8Array.BYTES_PER_ELEMENT = 1;
 src_graphics_Texture.rc = WebGLRenderingContext;
 src_graphics_vertices_VertexPosition.dummy = new src_graphics_vertices_VertexPosition(null);
 src_graphics_vertices_VertexPositionNormalTexture.dummy = new src_graphics_vertices_VertexPositionNormalTexture(null,null,null);
+src_graphics_vertices_VertexPositionTexture.dummy = new src_graphics_vertices_VertexPositionTexture(null,null);
 src_Game.main();
 })(typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);

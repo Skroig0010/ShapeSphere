@@ -25,6 +25,7 @@ src.graphics.vertices.VertexElementFormat
 src.graphics.vertices.VertexElementUsage
 src.graphics.vertices.VertexPosition
 src.graphics.vertices.VertexPositionNormalTexture
+src.graphics.vertices.VertexPositionTexture
 
 
 src.math.Vec2
@@ -34,10 +35,10 @@ src.math.Vec3Data
 src.math.Mat4
 src.math.Mat4Data
 
-src.parser.MQOParser
-src.parser.Lexer
-src.parser.Token
-src.parser.TokenType
+src.parser.Mqo
+src.parser.MqoLexer
+src.parser.MqoParser
+src.parser.MqoVal
 
 src.scene.Scene
 -js build/Game.js

@@ -32,10 +32,14 @@ class Game{
             new Texture("sample.png", resolve); 
         });
 
-        js.Promise.all([vert, frag, tex]).then(function (response){
+        js.Promise.all([vert, frag, tex, mqo]).then(function (response){
             var vert = cast (response[0], String);
             var frag = cast (response[1], String);
             var tex = cast (response[2], Texture);
+            var mqo = cast (response[3], String);
+
+            var parser = new src.parser.MqoParser(mqo, gd);
+            var x = parser.getMqo();
 
             var shader = new Shader(vert, frag);
 

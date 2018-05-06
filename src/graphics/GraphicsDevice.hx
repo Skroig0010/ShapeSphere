@@ -62,6 +62,7 @@ class GraphicsDevice{
     }
 
     public function vertexAttribPointer(location : Int, size : Int, pointerType : Int, normalized : Bool, stride : Int, offset : Int){
+        // offsetはデータ数*バイト数しなければならない
         gl.vertexAttribPointer(location, size, pointerType, normalized, stride, offset);
     }
 
