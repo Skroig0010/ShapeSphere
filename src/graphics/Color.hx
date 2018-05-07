@@ -6,5 +6,7 @@ enum Color {
     Blue;
     Black;
     White;
+    Clear;
     Rgb(r:Float, g:Float, b:Float);
+    Rgba(r:Float, g:Float, b:Float, a : Float);
 }

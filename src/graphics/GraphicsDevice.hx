@@ -1,6 +1,7 @@
 package src.graphics;
 import js.html.webgl.*;
 import src.graphics.vertices.*;
+import src.graphics.shader.ShaderProgramCache;
 
 class GraphicsDevice{
     public static var gl:RenderingContext;
@@ -8,6 +9,8 @@ class GraphicsDevice{
 
     public var vertexBuffer : Buffer;
     public var indexBuffer : Buffer;
+
+    public var shaderProgramCache : ShaderProgramCache;
 
     public function new(canvas : js.html.CanvasElement){
         try {
@@ -26,6 +29,11 @@ class GraphicsDevice{
                 RenderingContext.COLOR_BUFFER_BIT |
                 RenderingContext.DEPTH_BUFFER_BIT);
         maxVertexAttributes = gl.getParameter(RenderingContext.MAX_VERTEX_ATTRIBS);
+        shaderProgramCache = new ShaderProgramCache(this);
+
+        uniform1i = gl.uniform1i;
+        uniform4fv = gl.uniform4fv;
+        uniformMatrix4fv = gl.uniformMatrix4fv;
     }
 
     public function resize(width:Int, height:Int){
@@ -66,13 +74,15 @@ class GraphicsDevice{
         gl.vertexAttribPointer(location, size, pointerType, normalized, stride, offset);
     }
 
-    public function uniform1i(location : UniformLocation, x : Int){
+    /*public function uniform1i(location : UniformLocation, x : Int){
         gl.uniform1i(location, x);
-    }
+    }*/
 
-    public function uniformMatrix4fv(location : UniformLocation, matrix : Array<Float>){
-        gl.uniformMatrix4fv(location, false, matrix);
-    }
+    public var uniform1i(default, null) : UniformLocation -> Int -> Void;
+
+    public var uniform4fv(default, null) : UniformLocation -> Array<Float> -> Void;
+
+    public var uniformMatrix4fv(default, null) : UniformLocation -> Bool -> Array<Float> -> Void;
 
     public function drawElements(mode : Int, offset : Int, count : Int, ?declaration : VertexDeclaration, shader : src.graphics.shader.Shader){
         if(declaration != null){

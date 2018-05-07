@@ -41,14 +41,15 @@ class Game{
             var parser = new src.parser.MqoParser(mqo, gd);
             var x = parser.getMqo();
 
-            var shader = new Shader(vert, frag);
+            // var shader = new Shader(vert, frag);
 
             scene = new Scene();
             var eye = new Vec3(0, 0.4, 1);
             scene.setCamera(eye, eye.normalize(), new Vec3(0, 1, 0));
 
             tex.setFilter(TextureFilter.Point);
-            var mat = new Material(gd, shader, Color.Red, 0.0, 0.0, 0.0, tex);
+            // var mat = new Material(gd, shader, Color.Red, 0.0, 0.0, 0.0, tex);
+            var mat = x.materials[2];
 
             var vertices : Array<Float> = [
                 new VertexPositionNormalTexture(new Vec3(0.0, 0.5, 0.0), new Vec3(0.0, 0.0, 0.0), new Vec2(0.0, 0.0)), 

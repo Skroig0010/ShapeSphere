@@ -22,6 +22,7 @@ class Texture{
             GraphicsDevice.gl.bindTexture(rc.TEXTURE_2D, texture);
             GraphicsDevice.gl.texImage2D(rc.TEXTURE_2D, 0, rc.RGBA, rc.RGBA, rc.UNSIGNED_BYTE, img);
             GraphicsDevice.gl.generateMipmap(rc.TEXTURE_2D);
+            GraphicsDevice.gl.bindTexture(rc.TEXTURE_2D, null);
             tex = texture;
             cont(this);
         };
@@ -57,6 +58,7 @@ class Texture{
             case Anisotropic:
                 throw "Anisotropic filter isn't implemented";
         }
+        GraphicsDevice.gl.bindTexture(rc.TEXTURE_2D, null);
     }
 
     public function setAddressMode(mode : TextureAddressMode){
@@ -73,10 +75,12 @@ class Texture{
                 GraphicsDevice.gl.texParameteri(rc.TEXTURE_2D, rc.TEXTURE_WRAP_T, rc.MIRRORED_REPEAT);
 
         }
+        GraphicsDevice.gl.bindTexture(rc.TEXTURE_2D, null);
     }
     public function setParameterf(pname : Int, param : Float){
         GraphicsDevice.gl.bindTexture(rc.TEXTURE_2D, tex);
         GraphicsDevice.gl.texParameterf(rc.TEXTURE_2D, pname, param);
+        GraphicsDevice.gl.bindTexture(rc.TEXTURE_2D, null);
     }
 
     public function useTexture(){

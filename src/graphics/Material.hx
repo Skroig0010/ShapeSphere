@@ -22,6 +22,7 @@ class Material{
     var viewMatrixLocation : UniformLocation;
     var projMatrixLocation : UniformLocation;
     var textureLocation : UniformLocation;
+    var colorLocation : UniformLocation;
 
 
     public function new(gd:GraphicsDevice, shader:Shader, col:Color, dif:Float, amb:Float, spc:Float, tex:Texture){
@@ -37,6 +38,7 @@ class Material{
         transMatrixLocation = shader.getUniformLocation("transMatrix");
         viewMatrixLocation = shader.getUniformLocation("viewMatrix");
         projMatrixLocation = shader.getUniformLocation("projMatrix");
+        colorLocation = shader.getUniformLocation("color");
         if(tex != null){
             textureLocation = shader.getUniformLocation("texture");
         }
@@ -51,8 +53,27 @@ class Material{
         }
 
         // Uniform変数の設定
-        gd.uniformMatrix4fv(transMatrixLocation, Mat4.identity);
-        gd.uniformMatrix4fv(viewMatrixLocation, Mat4.lookAt(scene.camera));
-        gd.uniformMatrix4fv(projMatrixLocation, Mat4.perspective(1, Math.PI / 2, 0.1, 5));
+        gd.uniformMatrix4fv(transMatrixLocation, false, Mat4.identity);
+        gd.uniformMatrix4fv(viewMatrixLocation, false, Mat4.lookAt(scene.camera));
+        gd.uniformMatrix4fv(projMatrixLocation, false, Mat4.perspective(1, Math.PI / 2, 0.1, 5));
+        var color = switch(col){
+            case Red :
+                [1.0, 0.0, 0.0, 1.0];
+            case Green :
+                [0.0, 1.0, 0.0, 1.0];
+            case Blue :
+                [0.0, 0.0, 1.0, 1.0];
+            case Black :
+                [0.0, 0.0, 0.0, 1.0];
+            case White :
+                [1.0, 1.0, 1.0, 1.0];
+            case Clear :
+                [0.0, 0.0, 0.0, 0.0];
+            case Rgb(r, g, b) :
+                [r, g, b, 1.0];
+            case Rgba(r, g, b, a) :
+                [r, g, b, a];
+        }
+        gd.uniform4fv(colorLocation, color);
     }
 }
