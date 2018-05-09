@@ -27,6 +27,11 @@ abstract Vec2(Vec2Data) from Vec2Data to Vec2Data{
         return new Vec2(v1.x - v2.x, v1.y - v2.y);
     }
 
+    @:op(A==B)
+    public static inline function equals(v1 : Vec2, v2 : Vec2) : Bool{
+        return v1.x == v2.x && v1.y == v2.y;
+    }
+
     public inline function dot(v : Vec2)return this.x * v.x + this.y * v.y;
 
     public inline function cross(v : Vec2)return this.x * v.y - this.y * v.x;

@@ -2,11 +2,11 @@ package src.parser;
 import src.math.Vec3;
 
 class MqoObject{
-    var vertices : Array<Vec3>;
-    var face : Array<MqoFace>;
+    public var vertices : Array<Vec3>;
+    public var faces : Array<MqoFace>;
 
-    public function new(vertices : Array<Vec3>, face : Array<MqoFace>){
+    public function new(vertices : Array<Vec3>, faces : Array<MqoFace>){
         this.vertices = vertices;
-        this.face = face;
+        this.faces = faces;
     }
 }

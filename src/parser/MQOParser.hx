@@ -4,6 +4,7 @@ import src.graphics.GraphicsDevice;
 import src.graphics.Mesh;
 import src.graphics.MeshPart;
 import src.graphics.Material;
+import src.graphics.Texture;
 import src.graphics.shader.Shader;
 import src.graphics.vertices.VertexPositionTexture;
 import src.scene.Scene;
@@ -19,8 +20,6 @@ class MqoParser{
 
     public function getMqo() : Mqo{
         var scene = new Scene();
-        var mesh : Mesh;
-        var meshParts = new Array<MeshPart>();
         var materials = new Array<Material>();
         var objects = new Array<MqoObject>();
         if(!(eatSymbol("Metasequoia") && eatSymbol("Document") &&
@@ -28,7 +27,7 @@ class MqoParser{
                     eatSymbol("Ver") && eatFloat())){
             throw "invalid header";
         }
-        try{
+        // try{
             do{
                 switch(lexer.getToken()){
                     case Symbol("Scene") :
@@ -43,16 +42,20 @@ class MqoParser{
                         eatRBrace();
                     case Symbol("Object") :
                         objects.push(getObject());
+                    case Symbol("Thumbnail") :
+                        skipChunk();
+                    case Symbol("IncludeXml") :
+                        eatSymbol();
+                        eatString();
                     default :
                         lexer.moveNext();
                 }
             }while(lexer.getToken() != null);
 
-        }catch(msg : String){
-            trace("error : " + msg);
-        }
-        mesh = getMesh(scene, null, null);
-        return new Mqo(scene, mesh, meshParts, materials);
+        // }catch(msg : String){
+        //     trace("error : " + msg);
+        // }
+        return new Mqo(scene, materials, objects);
     }
 
     function getObject() : MqoObject{ 
@@ -90,6 +93,7 @@ class MqoParser{
                                            var num = getInt();
                                            vertices = getVertexChunk(num);
                 case Symbol("BVertex") : skipChunk();
+                case Symbol("vertexattr") : skipChunk();
                 case Symbol("face") :
                                          eatSymbol();
                                          var num = getInt();
@@ -128,16 +132,17 @@ class MqoParser{
         if(getInt() != 3){
             throw "face vertex number must be 3";
         }
-        var indices = new Array<Int>();
+        var indices : Array<Int> = null;
         var material = 0;
-        var uv = new Array<Vec2>();
-        var color = new Array<Color>();
-        var crs = new Array<Float>();
+        var uv : Array<Vec2> = [new Vec2(0, 0), new Vec2(0, 0), new Vec2(0, 0)];
+        var col : Array<Color> = null;
+        var crs : Array<Float> = null;
         while(lexer.getToken() != null){
             switch(lexer.getToken()){
                 case Symbol("V") :
                     eatSymbol();
                     eatLParen();
+                    indices = new Array<Int>();
                     for(j in 0...3){
                         indices.push(getInt());
                     }
@@ -150,6 +155,7 @@ class MqoParser{
                 case Symbol("UV") :
                     eatSymbol();
                     eatLParen();
+                    uv = new Array<Vec2>();
                     for(j in 0...3){
                         uv.push(new Vec2(getFloat(), getFloat()));
                     }
@@ -157,14 +163,16 @@ class MqoParser{
                 case Symbol("COL") :
                     eatSymbol();
                     eatLParen();
+                    col = new Array<Color>();
                     for(j in 0...3){
                         var x = getInt();
-                        color.push(Rgba(x & 0x000000FF,x & 0x0000FF00,x & 0x00FF0000,   x & 0xFF000000));
+                        col.push(Rgba(x & 0x000000FF,x & 0x0000FF00,x & 0x00FF0000,   x & 0xFF000000));
                     }
                     eatRParen();
                 case Symbol("CRS") :
                     eatSymbol();
                     eatLParen();
+                    crs = new Array<Float>();
                     for(j in 0...3){
                         crs.push(getFloat());
                     }
@@ -173,7 +181,7 @@ class MqoParser{
                     break;
             }
         }
-        return new MqoFace(indices, material, uv, color, crs);
+        return new MqoFace(indices, material, uv, col, crs);
     }
 
     function getScene() : Scene{
@@ -216,20 +224,17 @@ class MqoParser{
 
     }
 
-    function getMesh(scene : Scene, vertices : Array<Float>, indices : Array<Int>) : Mesh{
-        return new Mesh(gd, scene, vertices, indices);
-    }
-
     function getMaterial() : Material{
         var shader : Shader = null;
         var color : Color = White;
         var dif = 0.0, amb = 0.0, spc = 0.0;
+        var tex : Texture = null;
         // 最初のmoveNextでマテリアル名を食べる
         lexer.moveNext();
         while(lexer.getToken() != null){
             switch(lexer.getToken()){
                 case Symbol("shader") :
-                    eatSymbol("shader");
+                    eatSymbol();
                     eatLParen();
                     switch(getInt()){
                         case 0 | 1 | 2 | 3 | 4 :
@@ -239,34 +244,39 @@ class MqoParser{
                     }
                     eatRParen();
                 case Symbol("col") :
-                    eatSymbol("col");
+                    eatSymbol();
                     eatLParen();
                     color = Rgba(getFloat(), getFloat(), getFloat(), getFloat());
                     eatRParen();
                 case Symbol("dif") :
-                    eatSymbol("dif");
+                    eatSymbol();
                     eatLParen();
                     dif = getFloat();
                     eatRParen();
                 case Symbol("amb") :
-                    eatSymbol("amb");
+                    eatSymbol();
                     eatLParen();
                     amb = getFloat();
                     eatRParen();
                 case Symbol("spc") :
-                    eatSymbol("spc");
+                    eatSymbol();
                     eatLParen();
                     spc = getFloat();
                     eatRParen();
                 case Symbol("emi") :
-                    eatSymbol("emi");
+                    eatSymbol();
                     eatLParen();
                     getFloat();
                     eatRParen();
                 case Symbol("power") :
-                    eatSymbol("power");
+                    eatSymbol();
                     eatLParen();
                     getFloat();
+                    eatRParen();
+                case Symbol("tex") :
+                    eatSymbol();
+                    eatLParen();
+                    tex = new Texture(getString());
                     eatRParen();
                 case StringVal(_) :
                     break;
@@ -277,12 +287,9 @@ class MqoParser{
                     trace("Don't match " + lexer.getToken());
             }
         }
-        return new Material(gd, shader, color, dif, amb, spc, null/*texture*/);
+        return new Material(gd, shader, color, dif, amb, spc, tex);
     }
 
-    function getMeshPart(material : Material, parent : Mesh) : MeshPart{
-        return new MeshPart(gd, material, 0, 0, parent);
-    }
 
     function eatSymbol(?s : String) : Bool{
         switch(lexer.getToken()){
@@ -292,6 +299,15 @@ class MqoParser{
             default :
                 trace("Missing eat Symbol(" + s + "). you have to eat " + lexer.getToken());
                 return false;
+        }
+    }
+
+    function getString() : String{
+        return switch(lexer.getToken()){
+            case StringVal(s) :
+                lexer.moveNext();
+                s;
+            default : throw "Float cannot found. You found " + lexer.getToken();
         }
     }
 

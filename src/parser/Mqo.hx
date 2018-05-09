@@ -6,14 +6,12 @@ import src.graphics.Material;
 
 class Mqo{
     public var scene : Scene;
-    public var mesh : Mesh;
-    public var meshParts : Array<MeshPart>;
     public var materials : Array<Material>;
+    public var objects : Array<MqoObject>;
 
-    public function new(scene, mesh, meshParts, materials){
+    public function new(scene : Scene, materials : Array<Material>, objects : Array<MqoObject>){
         this.scene = scene;
-        this.mesh = mesh;
-        this.meshParts = meshParts;
         this.materials = materials;
+        this.objects = objects;
     }
 }

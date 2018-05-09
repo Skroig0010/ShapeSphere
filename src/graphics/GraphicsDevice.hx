@@ -22,6 +22,8 @@ class GraphicsDevice{
             js.Browser.alert(e);
         }
         gl.enable(RenderingContext.DEPTH_TEST);
+        gl.enable(RenderingContext.BLEND);
+        gl.blendFunc(RenderingContext.SRC_ALPHA, RenderingContext.ONE_MINUS_SRC_ALPHA);
         gl.viewport(0, 0, canvas.width, canvas.height);
 
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -87,7 +89,7 @@ class GraphicsDevice{
     public function drawElements(mode : Int, offset : Int, count : Int, ?declaration : VertexDeclaration, shader : src.graphics.shader.Shader){
         if(declaration != null){
             declaration.gd = this;
-            declaration.apply(shader, offset);
+            declaration.apply(shader, 0);
         }
         gl.drawElements(mode, count, RenderingContext.UNSIGNED_SHORT, offset);
     }

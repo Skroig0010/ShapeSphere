@@ -7,12 +7,20 @@ class MeshPart{
     // public var primitiveCount:Int;
     // public var startIndex:Int;
     public var vertexOffset(default, null):Int;
-    public var parent(default, null):Mesh;
+    @:isVar public var parent(default, null):Mesh;
 
     public function new(gd : GraphicsDevice, material : Material, numVertices : Int, vertexOffset : Int, parent : Mesh){
         this.material = material;
         this.numVertices = numVertices;
         this.vertexOffset = vertexOffset;
         this.parent = parent;
+    }
+
+    public function setParent(mesh : Mesh){
+        if(parent != null){
+        parent.meshParts.remove(this);
+        }
+        parent = mesh;
+        parent.meshParts.add(this);
     }
 }

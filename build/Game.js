@@ -236,6 +236,21 @@ haxe__$Int64__$_$_$Int64.__name__ = true;
 haxe__$Int64__$_$_$Int64.prototype = {
 	__class__: haxe__$Int64__$_$_$Int64
 };
+var haxe_ds_IntMap = function() {
+	this.h = { };
+};
+haxe_ds_IntMap.__name__ = true;
+haxe_ds_IntMap.__interfaces__ = [haxe_IMap];
+haxe_ds_IntMap.prototype = {
+	keys: function() {
+		var a = [];
+		for( var key in this.h ) if(this.h.hasOwnProperty(key)) {
+			a.push(key | 0);
+		}
+		return HxOverrides.iter(a);
+	}
+	,__class__: haxe_ds_IntMap
+};
 var haxe_ds_List = function() {
 	this.length = 0;
 };
@@ -258,6 +273,27 @@ haxe_ds_List.prototype = {
 			this.q = x;
 		}
 		this.length++;
+	}
+	,remove: function(v) {
+		var prev = null;
+		var l = this.h;
+		while(l != null) {
+			if(l.item == v) {
+				if(prev == null) {
+					this.h = l.next;
+				} else {
+					prev.next = l.next;
+				}
+				if(this.q == l) {
+					this.q = prev;
+				}
+				this.length--;
+				return true;
+			}
+			prev = l;
+			l = l.next;
+		}
+		return false;
 	}
 	,iterator: function() {
 		return new haxe_ds__$List_ListIterator(this.h);
@@ -918,64 +954,37 @@ src_Game.main = function() {
 	var frag = window.fetch("main.frag").then(function(response1) {
 		return response1.text();
 	});
-	var mqo = window.fetch("sample.mqo").then(function(response2) {
+	var mqo = window.fetch("uc2.mqo").then(function(response2) {
 		return response2.text();
 	});
-	var tex = new Promise(function(resolve,reject) {
-		new src_graphics_Texture("sample.png",resolve);
-	});
-	Promise.all([vert,frag,tex,mqo]).then(function(response3) {
+	Promise.all([vert,frag,mqo]).then(function(response3) {
 		var vert1 = js_Boot.__cast(response3[0] , String);
 		var frag1 = js_Boot.__cast(response3[1] , String);
-		var tex1 = js_Boot.__cast(response3[2] , src_graphics_Texture);
-		var mqo1 = js_Boot.__cast(response3[3] , String);
+		var mqo1 = js_Boot.__cast(response3[2] , String);
 		var parser = new src_parser_MqoParser(mqo1,src_Game.gd);
 		var x = parser.getMqo();
-		src_Game.scene = new src_scene_Scene();
-		var this1 = new src_math_Vec3Data(0,0.4,1);
-		var eye = this1;
+		var a = new src_content_contentreaders_ModelReader(src_Game.gd);
+		src_Game.meshes = a.makeMeshesFromMqo(x);
+		src_Game.scene = x.scene;
+		var v1 = src_Game.scene.camera.position;
+		var this1 = new src_math_Vec3Data(0,400,400);
+		var v2 = this1;
+		var this2 = new src_math_Vec3Data(v1.x + v2.x,v1.y + v2.y,v1.z + v2.z);
+		var eye = this2;
 		var tmp = src_Game.scene;
-		var l = Math.sqrt(eye.x * eye.x + eye.y * eye.y + eye.z * eye.z);
-		var this2 = new src_math_Vec3Data(eye.x / l,eye.y / l,eye.z / l);
-		var this3 = new src_math_Vec3Data(0,1,0);
-		tmp.setCamera(eye,this2,this3);
-		tex1.setFilter(src_graphics_states_TextureFilter.Point);
-		var mat = x.materials[2];
-		var this4 = new src_math_Vec3Data(0.0,0.5,0.0);
-		var this5 = new src_math_Vec3Data(0.0,0.0,0.0);
-		var this6 = new src_math_Vec2Data(0.0,0.0);
-		var vertices = new src_graphics_vertices_VertexPositionNormalTexture(this4,this5,this6);
-		var this7 = new src_math_Vec3Data(0.5,0.0,0.5);
-		var this8 = new src_math_Vec3Data(0.0,0.0,0.0);
-		var this9 = new src_math_Vec2Data(1.0,0.0);
-		var vertices1 = new src_graphics_vertices_VertexPositionNormalTexture(this7,this8,this9);
-		var this10 = new src_math_Vec3Data(-0.5,0.0,-0.5);
-		var this11 = new src_math_Vec3Data(0.0,0.0,0.0);
-		var this12 = new src_math_Vec2Data(0.0,1.0);
-		var vertices2 = Lambda.array(Lambda.flatten(Lambda.flatten([vertices,vertices1,new src_graphics_vertices_VertexPositionNormalTexture(this10,this11,this12)])));
-		src_Game.mesh = new src_graphics_Mesh(src_Game.gd,src_Game.scene,vertices2,[0,1,2]);
-		var meshpart = new src_graphics_MeshPart(src_Game.gd,mat,3,0,src_Game.mesh);
-		src_Game.mesh.meshParts.add(meshpart);
-		var this13 = new src_math_Vec3Data(0.0,0.5,0.0);
-		var this14 = new src_math_Vec3Data(0.0,0.0,0.0);
-		var this15 = new src_math_Vec2Data(0.0,0.0);
-		var vertices21 = new src_graphics_vertices_VertexPositionNormalTexture(this13,this14,this15);
-		var this16 = new src_math_Vec3Data(0.5,0.0,-0.5);
-		var this17 = new src_math_Vec3Data(0.0,0.0,0.0);
-		var this18 = new src_math_Vec2Data(0.0,1.0);
-		var vertices22 = new src_graphics_vertices_VertexPositionNormalTexture(this16,this17,this18);
-		var this19 = new src_math_Vec3Data(-0.5,0.0,0.5);
-		var this20 = new src_math_Vec3Data(0.0,0.0,0.0);
-		var this21 = new src_math_Vec2Data(1.0,1.0);
-		var vertices23 = Lambda.array(Lambda.flatten(Lambda.flatten([vertices21,vertices22,new src_graphics_vertices_VertexPositionNormalTexture(this19,this20,this21)])));
-		src_Game.mesh2 = new src_graphics_Mesh(src_Game.gd,src_Game.scene,vertices23,[0,1,2]);
-		var meshpart2 = new src_graphics_MeshPart(src_Game.gd,mat,3,0,src_Game.mesh2);
-		src_Game.mesh2.meshParts.add(meshpart2);
+		var this3 = new src_math_Vec3Data(0,400,0);
+		var v21 = this3;
+		var this4 = new src_math_Vec3Data(eye.x - v21.x,eye.y - v21.y,eye.z - v21.z);
+		var this5 = this4;
+		var l = Math.sqrt(this5.x * this5.x + this5.y * this5.y + this5.z * this5.z);
+		var this6 = new src_math_Vec3Data(this5.x / l,this5.y / l,this5.z / l);
+		var this7 = new src_math_Vec3Data(0,1,0);
+		tmp.setCamera(eye,this6,this7);
 		window.requestAnimationFrame(src_Game.loop);
 	});
 };
 src_Game.init = function() {
-	var canvas = src_Game.createCanvas(640,480);
+	var canvas = src_Game.createCanvas(1280,960);
 	src_Game.gd = new src_graphics_GraphicsDevice(canvas);
 };
 src_Game.createCanvas = function(width,height) {
@@ -998,14 +1007,23 @@ src_Game.update = function(dt) {
 	var eye = src_Game.scene.camera.position;
 	eye.x = eye.x * c - eye.z * s;
 	eye.z = eye.x * s + eye.z * c;
-	var l = Math.sqrt(eye.x * eye.x + eye.y * eye.y + eye.z * eye.z);
-	var this1 = new src_math_Vec3Data(eye.x / l,eye.y / l,eye.z / l);
-	src_Game.scene.camera.forward = this1;
+	var this1 = new src_math_Vec3Data(0,400,0);
+	var v2 = this1;
+	var this2 = new src_math_Vec3Data(eye.x - v2.x,eye.y - v2.y,eye.z - v2.z);
+	var this3 = this2;
+	var l = Math.sqrt(this3.x * this3.x + this3.y * this3.y + this3.z * this3.z);
+	var this4 = new src_math_Vec3Data(this3.x / l,this3.y / l,this3.z / l);
+	src_Game.scene.camera.forward = this4;
 };
 src_Game.render = function(dt) {
 	src_Game.gd.startRender();
-	src_Game.mesh.render();
-	src_Game.mesh2.render();
+	var _g = 0;
+	var _g1 = src_Game.meshes;
+	while(_g < _g1.length) {
+		var m = _g1[_g];
+		++_g;
+		m.render();
+	}
 	src_Game.gd.endRender();
 };
 var src_camera_Camera = function(position,forward,up) {
@@ -1040,12 +1058,101 @@ src_camera_Camera.prototype = {
 };
 var src_content_ContentManager = function() { };
 src_content_ContentManager.__name__ = true;
-var src_content_contentreaders_ModelReader = function() { };
-src_content_contentreaders_ModelReader.__name__ = true;
-src_content_contentreaders_ModelReader.makeMesh = function(sourceText) {
+var src_content_contentreaders_ModelReader = function(gd) {
+	this.gd = gd;
 };
+src_content_contentreaders_ModelReader.__name__ = true;
 src_content_contentreaders_ModelReader.prototype = {
-	read: function(text) {
+	makeMeshesFromMqo: function(mqo) {
+		var meshes = [];
+		var _g = 0;
+		var _g1 = mqo.objects;
+		while(_g < _g1.length) {
+			var obj = _g1[_g];
+			++_g;
+			meshes.push(this.makeMeshFromMqoObject(obj,mqo));
+		}
+		return meshes;
+	}
+	,makeMeshFromMqoObject: function(object,mqo) {
+		var vertices = [];
+		var partIndices = new haxe_ds_IntMap();
+		var indexMap_h = { };
+		var _g = 0;
+		var _g1 = object.faces;
+		while(_g < _g1.length) {
+			var face = _g1[_g];
+			++_g;
+			var v1 = object.vertices[face.indices[1]];
+			var v2 = object.vertices[face.indices[0]];
+			var this1 = new src_math_Vec3Data(v1.x - v2.x,v1.y - v2.y,v1.z - v2.z);
+			var this2 = this1;
+			var v11 = object.vertices[face.indices[2]];
+			var v21 = object.vertices[face.indices[0]];
+			var this3 = new src_math_Vec3Data(v11.x - v21.x,v11.y - v21.y,v11.z - v21.z);
+			var v = this3;
+			var this4 = new src_math_Vec3Data(this2.y * v.z - this2.z * v.y,this2.z * v.x - this2.x * v.z,this2.x * v.y - this2.y * v.x);
+			var this5 = this4;
+			var l = Math.sqrt(this5.x * this5.x + this5.y * this5.y + this5.z * this5.z);
+			var this6 = new src_math_Vec3Data(this5.x / l,this5.y / l,this5.z / l);
+			var normal = this6;
+			if(!partIndices.h.hasOwnProperty(face.material)) {
+				var key = face.material;
+				var value = [];
+				partIndices.h[key] = value;
+			}
+			var _g2 = 0;
+			while(_g2 < 3) {
+				var i = _g2++;
+				if(!indexMap_h.hasOwnProperty(face.indices[i])) {
+					indexMap_h[face.indices[i]] = [];
+					vertices[face.indices[i]] = new src_graphics_vertices_VertexPositionNormalTexture(object.vertices[face.indices[i]],normal,face.uv[i]);
+					partIndices.h[face.material].push(face.indices[i]);
+				} else {
+					var foundIndex = false;
+					var _g3 = 0;
+					var _g4 = [face.indices[i]].concat(indexMap_h[face.indices[i]]);
+					while(_g3 < _g4.length) {
+						var index = _g4[_g3];
+						++_g3;
+						var v12 = vertices[index].normal;
+						var this7 = new src_math_Vec3Data(v12.x + normal.x,v12.y + normal.y,v12.z + normal.z);
+						vertices[index].normal = this7;
+						var v13 = vertices[index].textureCoordinate;
+						var v22 = face.uv[i];
+						if(v13.x == v22.x && v13.y == v22.y) {
+							partIndices.h[face.material].push(index);
+							foundIndex = true;
+						}
+					}
+					if(!foundIndex) {
+						object.vertices.push(object.vertices[face.indices[i]]);
+						var newIndex = object.vertices.length - 1;
+						indexMap_h[face.indices[i]].push(newIndex);
+						vertices[newIndex] = new src_graphics_vertices_VertexPositionNormalTexture(object.vertices[newIndex],vertices[face.indices[i]].normal,face.uv[i]);
+						partIndices.h[face.material].push(newIndex);
+					}
+				}
+			}
+		}
+		var indices = [];
+		var meshParts = [];
+		var offset = 0;
+		var key1 = partIndices.keys();
+		while(key1.hasNext()) {
+			var key2 = key1.next();
+			indices = indices.concat(partIndices.h[key2]);
+			meshParts.push(new src_graphics_MeshPart(this.gd,mqo.materials[key2],partIndices.h[key2].length,offset * 2,null));
+			offset += partIndices.h[key2].length;
+		}
+		var mesh = new src_graphics_Mesh(this.gd,mqo.scene,Lambda.array(Lambda.flatten(Lambda.flatten(vertices))),indices);
+		var _g5 = 0;
+		while(_g5 < meshParts.length) {
+			var part = meshParts[_g5];
+			++_g5;
+			part.setParent(mesh);
+		}
+		return mesh;
 	}
 	,__class__: src_content_contentreaders_ModelReader
 };
@@ -1081,6 +1188,8 @@ var src_graphics_GraphicsDevice = function(canvas) {
 		js_Browser.alert(e);
 	}
 	src_graphics_GraphicsDevice.gl.enable(2929);
+	src_graphics_GraphicsDevice.gl.enable(3042);
+	src_graphics_GraphicsDevice.gl.blendFunc(770,771);
 	src_graphics_GraphicsDevice.gl.viewport(0,0,canvas.width,canvas.height);
 	src_graphics_GraphicsDevice.gl.clearColor(0.0,0.0,0.0,1.0);
 	src_graphics_GraphicsDevice.gl.clear(16640);
@@ -1123,7 +1232,7 @@ src_graphics_GraphicsDevice.prototype = {
 	,drawElements: function(mode,offset,count,declaration,shader) {
 		if(declaration != null) {
 			declaration.gd = this;
-			declaration.apply(shader,offset);
+			declaration.apply(shader,0);
 		}
 		src_graphics_GraphicsDevice.gl.drawElements(mode,count,5123,offset);
 	}
@@ -1269,7 +1378,41 @@ src_graphics_GraphicsExtensions.getSize = function(elementFormat) {
 var src_graphics_Material = function(gd,shader,col,dif,amb,spc,tex) {
 	this.gd = gd;
 	this.shader = shader;
-	this.col = col;
+	var tmp;
+	switch(col[1]) {
+	case 0:
+		tmp = [1.0,0.0,0.0,1.0];
+		break;
+	case 1:
+		tmp = [0.0,1.0,0.0,1.0];
+		break;
+	case 2:
+		tmp = [0.0,0.0,1.0,1.0];
+		break;
+	case 3:
+		tmp = [0.0,0.0,0.0,1.0];
+		break;
+	case 4:
+		tmp = [1.0,1.0,1.0,1.0];
+		break;
+	case 5:
+		tmp = [0.0,0.0,0.0,0.0];
+		break;
+	case 6:
+		var b = col[4];
+		var g = col[3];
+		var r = col[2];
+		tmp = [r,g,b,1.0];
+		break;
+	case 7:
+		var a = col[5];
+		var b1 = col[4];
+		var g1 = col[3];
+		var r1 = col[2];
+		tmp = [r1,g1,b1,a];
+		break;
+	}
+	this.col = tmp;
 	this.dif = dif;
 	this.amb = amb;
 	this.spc = spc;
@@ -1292,67 +1435,34 @@ src_graphics_Material.prototype = {
 		}
 		var tmp = this.gd.uniformMatrix4fv;
 		var tmp1 = this.transMatrixLocation;
-		var this1 = new src_math_Mat4Data([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);
-		tmp(tmp1,false,src_math__$Mat4_Mat4_$Impl_$.toArray(this1));
+		var this1 = new src_math_Vec3Data(6,6,6);
+		var v = this1;
+		var this2 = new src_math_Mat4Data([v.x,0,0,0,0,v.y,0,0,0,0,v.z,0,0,0,0,1]);
+		tmp(tmp1,false,src_math__$Mat4_Mat4_$Impl_$.toArray(this2));
 		var tmp2 = this.gd.uniformMatrix4fv;
 		var tmp3 = this.viewMatrixLocation;
 		var camera = scene.camera;
 		var eye = camera.position;
 		var forward = camera.forward;
 		var up = camera.up;
-		var this2 = new src_math_Vec3Data(up.y * forward.z - up.z * forward.y,up.z * forward.x - up.x * forward.z,up.x * forward.y - up.y * forward.x);
-		var this3 = this2;
-		var l = Math.sqrt(this3.x * this3.x + this3.y * this3.y + this3.z * this3.z);
-		var this4 = new src_math_Vec3Data(this3.x / l,this3.y / l,this3.z / l);
-		var side = this4;
-		var this5 = new src_math_Vec3Data(forward.y * side.z - forward.z * side.y,forward.z * side.x - forward.x * side.z,forward.x * side.y - forward.y * side.x);
-		var this6 = this5;
-		var l1 = Math.sqrt(this6.x * this6.x + this6.y * this6.y + this6.z * this6.z);
-		var this7 = new src_math_Vec3Data(this6.x / l1,this6.y / l1,this6.z / l1);
-		up = this7;
-		var this8 = new src_math_Mat4Data([side.x,up.x,forward.x,0,side.y,up.y,forward.y,0,side.z,up.z,forward.z,0,-(eye.x * side.x + eye.y * side.y + eye.z * side.z),-(eye.x * up.x + eye.y * up.y + eye.z * up.z),-(eye.x * forward.x + eye.y * forward.y + eye.z * forward.z),1]);
-		tmp2(tmp3,false,src_math__$Mat4_Mat4_$Impl_$.toArray(this8));
+		var this3 = new src_math_Vec3Data(up.y * forward.z - up.z * forward.y,up.z * forward.x - up.x * forward.z,up.x * forward.y - up.y * forward.x);
+		var this4 = this3;
+		var l = Math.sqrt(this4.x * this4.x + this4.y * this4.y + this4.z * this4.z);
+		var this5 = new src_math_Vec3Data(this4.x / l,this4.y / l,this4.z / l);
+		var side = this5;
+		var this6 = new src_math_Vec3Data(forward.y * side.z - forward.z * side.y,forward.z * side.x - forward.x * side.z,forward.x * side.y - forward.y * side.x);
+		var this7 = this6;
+		var l1 = Math.sqrt(this7.x * this7.x + this7.y * this7.y + this7.z * this7.z);
+		var this8 = new src_math_Vec3Data(this7.x / l1,this7.y / l1,this7.z / l1);
+		up = this8;
+		var this9 = new src_math_Mat4Data([side.x,up.x,forward.x,0,side.y,up.y,forward.y,0,side.z,up.z,forward.z,0,-(eye.x * side.x + eye.y * side.y + eye.z * side.z),-(eye.x * up.x + eye.y * up.y + eye.z * up.z),-(eye.x * forward.x + eye.y * forward.y + eye.z * forward.z),1]);
+		tmp2(tmp3,false,src_math__$Mat4_Mat4_$Impl_$.toArray(this9));
 		var tmp4 = this.gd.uniformMatrix4fv;
 		var tmp5 = this.projMatrixLocation;
 		var t = Math.tan(Math.PI / 2 / 2);
-		var this9 = new src_math_Mat4Data([1 / t,0,0,0,0,1 / t,0,0,0,0,-1.04081632653061207,-1,0,0,-0.204081632653061201,0]);
-		tmp4(tmp5,false,src_math__$Mat4_Mat4_$Impl_$.toArray(this9));
-		var color;
-		var _g = this.col;
-		switch(_g[1]) {
-		case 0:
-			color = [1.0,0.0,0.0,1.0];
-			break;
-		case 1:
-			color = [0.0,1.0,0.0,1.0];
-			break;
-		case 2:
-			color = [0.0,0.0,1.0,1.0];
-			break;
-		case 3:
-			color = [0.0,0.0,0.0,1.0];
-			break;
-		case 4:
-			color = [1.0,1.0,1.0,1.0];
-			break;
-		case 5:
-			color = [0.0,0.0,0.0,0.0];
-			break;
-		case 6:
-			var b = _g[4];
-			var g = _g[3];
-			var r = _g[2];
-			color = [r,g,b,1.0];
-			break;
-		case 7:
-			var a = _g[5];
-			var b1 = _g[4];
-			var g1 = _g[3];
-			var r1 = _g[2];
-			color = [r1,g1,b1,a];
-			break;
-		}
-		this.gd.uniform4fv(this.colorLocation,color);
+		var this10 = new src_math_Mat4Data([1 / (1.33333333333333326 * t),0,0,0,0,1 / t,0,0,0,0,-1.02020202020202,-1,0,0,-202.020202020202021,0]);
+		tmp4(tmp5,false,src_math__$Mat4_Mat4_$Impl_$.toArray(this10));
+		this.gd.uniform4fv(this.colorLocation,this.col);
 	}
 	,__class__: src_graphics_Material
 };
@@ -1391,21 +1501,31 @@ var src_graphics_MeshPart = function(gd,material,numVertices,vertexOffset,parent
 };
 src_graphics_MeshPart.__name__ = true;
 src_graphics_MeshPart.prototype = {
-	__class__: src_graphics_MeshPart
+	setParent: function(mesh) {
+		if(this.parent != null) {
+			this.parent.meshParts.remove(this);
+		}
+		this.parent = mesh;
+		this.parent.meshParts.add(this);
+	}
+	,__class__: src_graphics_MeshPart
 };
-var src_graphics_Texture = function(src1,cont) {
+var src_graphics_Texture = function(src1) {
 	var _gthis = this;
 	this.img = new Image();
 	this.img.src = src1;
+	src_graphics_GraphicsDevice.gl.activeTexture(33984);
+	var texture = src_graphics_GraphicsDevice.gl.createTexture();
+	src_graphics_GraphicsDevice.gl.bindTexture(3553,texture);
+	src_graphics_GraphicsDevice.gl.texImage2D(3553,0,6408,2,2,0,6408,5121,new Uint8Array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]));
+	src_graphics_GraphicsDevice.gl.generateMipmap(3553);
+	src_graphics_GraphicsDevice.gl.bindTexture(3553,null);
+	this.tex = texture;
 	this.img.onload = function(_) {
-		src_graphics_GraphicsDevice.gl.activeTexture(33984);
-		var texture = src_graphics_GraphicsDevice.gl.createTexture();
 		src_graphics_GraphicsDevice.gl.bindTexture(3553,texture);
 		src_graphics_GraphicsDevice.gl.texImage2D(3553,0,6408,6408,5121,_gthis.img);
 		src_graphics_GraphicsDevice.gl.generateMipmap(3553);
 		src_graphics_GraphicsDevice.gl.bindTexture(3553,null);
-		_gthis.tex = texture;
-		cont(_gthis);
 	};
 };
 src_graphics_Texture.__name__ = true;
@@ -2010,6 +2130,13 @@ src_math__$Vec2_Vec2_$Impl_$.sub = function(v1,v2) {
 	var this1 = new src_math_Vec2Data(v1.x - v2.x,v1.y - v2.y);
 	return this1;
 };
+src_math__$Vec2_Vec2_$Impl_$.equals = function(v1,v2) {
+	if(v1.x == v2.x) {
+		return v1.y == v2.y;
+	} else {
+		return false;
+	}
+};
 src_math__$Vec2_Vec2_$Impl_$.dot = function(this1,v) {
 	return this1.x * v.x + this1.y * v.y;
 };
@@ -2053,6 +2180,13 @@ src_math__$Vec3_Vec3_$Impl_$.sub = function(v1,v2) {
 	var this1 = new src_math_Vec3Data(v1.x - v2.x,v1.y - v2.y,v1.z - v2.z);
 	return this1;
 };
+src_math__$Vec3_Vec3_$Impl_$.equals = function(v1,v2) {
+	if(v1.x == v2.x && v1.y == v2.y) {
+		return v1.z == v2.z;
+	} else {
+		return false;
+	}
+};
 src_math__$Vec3_Vec3_$Impl_$.dot = function(this1,v) {
 	return this1.x * v.x + this1.y * v.y + this1.z * v.z;
 };
@@ -2072,11 +2206,10 @@ src_math_Vec3Data.prototype = {
 	}
 	,__class__: src_math_Vec3Data
 };
-var src_parser_Mqo = function(scene,mesh,meshParts,materials) {
+var src_parser_Mqo = function(scene,materials,objects) {
 	this.scene = scene;
-	this.mesh = mesh;
-	this.meshParts = meshParts;
 	this.materials = materials;
+	this.objects = objects;
 };
 src_parser_Mqo.__name__ = true;
 src_parser_Mqo.prototype = {
@@ -2223,9 +2356,9 @@ src_parser_MqoLexer.prototype = {
 	}
 	,__class__: src_parser_MqoLexer
 };
-var src_parser_MqoObject = function(vertices,face) {
+var src_parser_MqoObject = function(vertices,faces) {
 	this.vertices = vertices;
-	this.face = face;
+	this.faces = faces;
 };
 src_parser_MqoObject.__name__ = true;
 src_parser_MqoObject.prototype = {
@@ -2239,53 +2372,51 @@ src_parser_MqoParser.__name__ = true;
 src_parser_MqoParser.prototype = {
 	getMqo: function() {
 		var scene = new src_scene_Scene();
-		var meshParts = [];
 		var materials = [];
 		var objects = [];
 		if(!(this.eatSymbol("Metasequoia") && this.eatSymbol("Document") && this.eatSymbol("Format") && this.eatSymbol("Text") && this.eatSymbol("Ver") && this.eatFloat())) {
 			throw new js__$Boot_HaxeError("invalid header");
 		}
-		try {
-			while(true) {
-				var _g = this.lexer.getToken();
-				if(_g[1] == 0) {
-					switch(_g[2]) {
-					case "Material":
-						this.eatSymbol("Material");
-						var num = this.getInt();
-						this.eatLBrace();
-						var _g1 = 0;
-						var _g2 = num;
-						while(_g1 < _g2) {
-							var i = _g1++;
-							materials.push(this.getMaterial());
-						}
-						this.eatRBrace();
-						break;
-					case "Object":
-						objects.push(this.getObject());
-						break;
-					case "Scene":
-						scene = this.getScene();
-						break;
-					default:
-						this.lexer.moveNext();
+		while(true) {
+			var _g = this.lexer.getToken();
+			if(_g[1] == 0) {
+				switch(_g[2]) {
+				case "IncludeXml":
+					this.eatSymbol();
+					this.eatString();
+					break;
+				case "Material":
+					this.eatSymbol("Material");
+					var num = this.getInt();
+					this.eatLBrace();
+					var _g1 = 0;
+					var _g2 = num;
+					while(_g1 < _g2) {
+						var i = _g1++;
+						materials.push(this.getMaterial());
 					}
-				} else {
+					this.eatRBrace();
+					break;
+				case "Object":
+					objects.push(this.getObject());
+					break;
+				case "Scene":
+					scene = this.getScene();
+					break;
+				case "Thumbnail":
+					this.skipChunk();
+					break;
+				default:
 					this.lexer.moveNext();
 				}
-				if(!(this.lexer.getToken() != null)) {
-					break;
-				}
+			} else {
+				this.lexer.moveNext();
 			}
-		} catch( msg ) {
-			if (msg instanceof js__$Boot_HaxeError) msg = msg.val;
-			if( js_Boot.__instanceof(msg,String) ) {
-				console.log("MqoParser.hx:52:","error : " + msg);
-			} else throw(msg);
+			if(!(this.lexer.getToken() != null)) {
+				break;
+			}
 		}
-		var mesh = this.getMesh(scene,null,null);
-		return new src_parser_Mqo(scene,mesh,meshParts,materials);
+		return new src_parser_Mqo(scene,materials,objects);
 	}
 	,getObject: function() {
 		var vertices = [];
@@ -2403,6 +2534,9 @@ src_parser_MqoParser.prototype = {
 					var num1 = this.getInt();
 					vertices = this.getVertexChunk(num1);
 					break;
+				case "vertexattr":
+					this.skipChunk();
+					break;
 				case "visible":
 					this.eatSymbol();
 					this.eatInt();
@@ -2449,11 +2583,14 @@ src_parser_MqoParser.prototype = {
 		if(this.getInt() != 3) {
 			throw new js__$Boot_HaxeError("face vertex number must be 3");
 		}
-		var indices = [];
+		var indices = null;
 		var material = 0;
-		var uv = [];
-		var color = [];
-		var crs = [];
+		var this1 = new src_math_Vec2Data(0,0);
+		var this2 = new src_math_Vec2Data(0,0);
+		var this3 = new src_math_Vec2Data(0,0);
+		var uv = [this1,this2,this3];
+		var col = null;
+		var crs = null;
 		_hx_loop1: while(this.lexer.getToken() != null) {
 			var _g = this.lexer.getToken();
 			if(_g[1] == 0) {
@@ -2461,17 +2598,19 @@ src_parser_MqoParser.prototype = {
 				case "COL":
 					this.eatSymbol();
 					this.eatLParen();
+					col = [];
 					var _g1 = 0;
 					while(_g1 < 3) {
 						var j = _g1++;
 						var x = this.getInt();
-						color.push(src_graphics_Color.Rgba(x & 255,x & 65280,x & 16711680,x & -16777216));
+						col.push(src_graphics_Color.Rgba(x & 255,x & 65280,x & 16711680,x & -16777216));
 					}
 					this.eatRParen();
 					break;
 				case "CRS":
 					this.eatSymbol();
 					this.eatLParen();
+					crs = [];
 					var _g2 = 0;
 					while(_g2 < 3) {
 						var j1 = _g2++;
@@ -2488,17 +2627,19 @@ src_parser_MqoParser.prototype = {
 				case "UV":
 					this.eatSymbol();
 					this.eatLParen();
+					uv = [];
 					var _g3 = 0;
 					while(_g3 < 3) {
 						var j2 = _g3++;
-						var this1 = new src_math_Vec2Data(this.getFloat(),this.getFloat());
-						uv.push(this1);
+						var this4 = new src_math_Vec2Data(this.getFloat(),this.getFloat());
+						uv.push(this4);
 					}
 					this.eatRParen();
 					break;
 				case "V":
 					this.eatSymbol();
 					this.eatLParen();
+					indices = [];
 					var _g4 = 0;
 					while(_g4 < 3) {
 						var j3 = _g4++;
@@ -2513,7 +2654,7 @@ src_parser_MqoParser.prototype = {
 				break;
 			}
 		}
-		return new src_parser_MqoFace(indices,material,uv,color,crs);
+		return new src_parser_MqoFace(indices,material,uv,col,crs);
 	}
 	,getScene: function() {
 		var this1 = new src_math_Vec3Data(0,0,0);
@@ -2583,15 +2724,13 @@ src_parser_MqoParser.prototype = {
 		scene.setCamera(position,this8,up);
 		return scene;
 	}
-	,getMesh: function(scene,vertices,indices) {
-		return new src_graphics_Mesh(this.gd,scene,vertices,indices);
-	}
 	,getMaterial: function() {
 		var shader = null;
 		var color = src_graphics_Color.White;
 		var dif = 0.0;
 		var amb = 0.0;
 		var spc = 0.0;
+		var tex = null;
 		this.lexer.moveNext();
 		_hx_loop1: while(this.lexer.getToken() != null) {
 			var _g = this.lexer.getToken();
@@ -2599,37 +2738,37 @@ src_parser_MqoParser.prototype = {
 			case 0:
 				switch(_g[2]) {
 				case "amb":
-					this.eatSymbol("amb");
+					this.eatSymbol();
 					this.eatLParen();
 					amb = this.getFloat();
 					this.eatRParen();
 					break;
 				case "col":
-					this.eatSymbol("col");
+					this.eatSymbol();
 					this.eatLParen();
 					color = src_graphics_Color.Rgba(this.getFloat(),this.getFloat(),this.getFloat(),this.getFloat());
 					this.eatRParen();
 					break;
 				case "dif":
-					this.eatSymbol("dif");
+					this.eatSymbol();
 					this.eatLParen();
 					dif = this.getFloat();
 					this.eatRParen();
 					break;
 				case "emi":
-					this.eatSymbol("emi");
+					this.eatSymbol();
 					this.eatLParen();
 					this.getFloat();
 					this.eatRParen();
 					break;
 				case "power":
-					this.eatSymbol("power");
+					this.eatSymbol();
 					this.eatLParen();
 					this.getFloat();
 					this.eatRParen();
 					break;
 				case "shader":
-					this.eatSymbol("shader");
+					this.eatSymbol();
 					this.eatLParen();
 					var _g1 = this.getInt();
 					switch(_g1) {
@@ -2642,14 +2781,20 @@ src_parser_MqoParser.prototype = {
 					this.eatRParen();
 					break;
 				case "spc":
-					this.eatSymbol("spc");
+					this.eatSymbol();
 					this.eatLParen();
 					spc = this.getFloat();
 					this.eatRParen();
 					break;
+				case "tex":
+					this.eatSymbol();
+					this.eatLParen();
+					tex = new src_graphics_Texture(this.getString());
+					this.eatRParen();
+					break;
 				default:
 					this.lexer.moveNext();
-					console.log("MqoParser.hx:277:","Don't match " + Std.string(this.lexer.getToken()));
+					console.log("MqoParser.hx:287:","Don't match " + Std.string(this.lexer.getToken()));
 				}
 				break;
 			case 3:
@@ -2658,13 +2803,10 @@ src_parser_MqoParser.prototype = {
 				break _hx_loop1;
 			default:
 				this.lexer.moveNext();
-				console.log("MqoParser.hx:277:","Don't match " + Std.string(this.lexer.getToken()));
+				console.log("MqoParser.hx:287:","Don't match " + Std.string(this.lexer.getToken()));
 			}
 		}
-		return new src_graphics_Material(this.gd,shader,color,dif,amb,spc,null);
-	}
-	,getMeshPart: function(material,parent) {
-		return new src_graphics_MeshPart(this.gd,material,0,0,parent);
+		return new src_graphics_Material(this.gd,shader,color,dif,amb,spc,tex);
 	}
 	,eatSymbol: function(s) {
 		var _g = this.lexer.getToken();
@@ -2674,12 +2816,22 @@ src_parser_MqoParser.prototype = {
 				this.lexer.moveNext();
 				return true;
 			} else {
-				console.log("MqoParser.hx:293:","Missing eat Symbol(" + s + "). you have to eat " + Std.string(this.lexer.getToken()));
+				console.log("MqoParser.hx:300:","Missing eat Symbol(" + s + "). you have to eat " + Std.string(this.lexer.getToken()));
 				return false;
 			}
 		} else {
-			console.log("MqoParser.hx:293:","Missing eat Symbol(" + s + "). you have to eat " + Std.string(this.lexer.getToken()));
+			console.log("MqoParser.hx:300:","Missing eat Symbol(" + s + "). you have to eat " + Std.string(this.lexer.getToken()));
 			return false;
+		}
+	}
+	,getString: function() {
+		var _g = this.lexer.getToken();
+		if(_g[1] == 3) {
+			var s = _g[2];
+			this.lexer.moveNext();
+			return s;
+		} else {
+			throw new js__$Boot_HaxeError("Float cannot found. You found " + Std.string(this.lexer.getToken()));
 		}
 	}
 	,getFloat: function() {
@@ -2763,11 +2915,11 @@ src_parser_MqoParser.prototype = {
 				this.lexer.moveNext();
 				return true;
 			} else {
-				console.log("MqoParser.hx:346:","Missing eat String(" + s + "). you have to eat " + Std.string(this.lexer.getToken()));
+				console.log("MqoParser.hx:362:","Missing eat String(" + s + "). you have to eat " + Std.string(this.lexer.getToken()));
 				return false;
 			}
 		} else {
-			console.log("MqoParser.hx:346:","Missing eat String(" + s + "). you have to eat " + Std.string(this.lexer.getToken()));
+			console.log("MqoParser.hx:362:","Missing eat String(" + s + "). you have to eat " + Std.string(this.lexer.getToken()));
 			return false;
 		}
 	}
@@ -2779,11 +2931,11 @@ src_parser_MqoParser.prototype = {
 				this.lexer.moveNext();
 				return true;
 			} else {
-				console.log("MqoParser.hx:358:","Missing eat Int(" + i + "). you have to eat " + Std.string(this.lexer.getToken()));
+				console.log("MqoParser.hx:374:","Missing eat Int(" + i + "). you have to eat " + Std.string(this.lexer.getToken()));
 				return false;
 			}
 		} else {
-			console.log("MqoParser.hx:358:","Missing eat Int(" + i + "). you have to eat " + Std.string(this.lexer.getToken()));
+			console.log("MqoParser.hx:374:","Missing eat Int(" + i + "). you have to eat " + Std.string(this.lexer.getToken()));
 			return false;
 		}
 	}
@@ -2796,7 +2948,7 @@ src_parser_MqoParser.prototype = {
 				this.lexer.moveNext();
 				return true;
 			} else {
-				console.log("MqoParser.hx:373:","Missing eat Float(" + f + "). you have to eat " + Std.string(this.lexer.getToken()));
+				console.log("MqoParser.hx:389:","Missing eat Float(" + f + "). you have to eat " + Std.string(this.lexer.getToken()));
 				return false;
 			}
 			break;
@@ -2806,12 +2958,12 @@ src_parser_MqoParser.prototype = {
 				this.lexer.moveNext();
 				return true;
 			} else {
-				console.log("MqoParser.hx:373:","Missing eat Float(" + f + "). you have to eat " + Std.string(this.lexer.getToken()));
+				console.log("MqoParser.hx:389:","Missing eat Float(" + f + "). you have to eat " + Std.string(this.lexer.getToken()));
 				return false;
 			}
 			break;
 		default:
-			console.log("MqoParser.hx:373:","Missing eat Float(" + f + "). you have to eat " + Std.string(this.lexer.getToken()));
+			console.log("MqoParser.hx:389:","Missing eat Float(" + f + "). you have to eat " + Std.string(this.lexer.getToken()));
 			return false;
 		}
 	}
@@ -2821,7 +2973,7 @@ src_parser_MqoParser.prototype = {
 			this.lexer.moveNext();
 			return true;
 		} else {
-			console.log("MqoParser.hx:385:","Missing eat LBrace. you have to eat " + Std.string(this.lexer.getToken()));
+			console.log("MqoParser.hx:401:","Missing eat LBrace. you have to eat " + Std.string(this.lexer.getToken()));
 			return false;
 		}
 	}
@@ -2831,7 +2983,7 @@ src_parser_MqoParser.prototype = {
 			this.lexer.moveNext();
 			return true;
 		} else {
-			console.log("MqoParser.hx:397:","Missing eat RBrace. you have to eat " + Std.string(this.lexer.getToken()));
+			console.log("MqoParser.hx:413:","Missing eat RBrace. you have to eat " + Std.string(this.lexer.getToken()));
 			return false;
 		}
 	}
@@ -2841,7 +2993,7 @@ src_parser_MqoParser.prototype = {
 			this.lexer.moveNext();
 			return true;
 		} else {
-			console.log("MqoParser.hx:409:","Missing eat LParen. you have to eat " + Std.string(this.lexer.getToken()));
+			console.log("MqoParser.hx:425:","Missing eat LParen. you have to eat " + Std.string(this.lexer.getToken()));
 			return false;
 		}
 	}
@@ -2851,7 +3003,7 @@ src_parser_MqoParser.prototype = {
 			this.lexer.moveNext();
 			return true;
 		} else {
-			console.log("MqoParser.hx:421:","Missing eat LParen. you have to eat " + Std.string(this.lexer.getToken()));
+			console.log("MqoParser.hx:437:","Missing eat LParen. you have to eat " + Std.string(this.lexer.getToken()));
 			return false;
 		}
 	}

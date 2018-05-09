@@ -15,6 +15,7 @@ class Game{
 
     static var mesh : Mesh;
     static var mesh2 : Mesh;
+    static var meshes : Array<Mesh>;
     static var scene : Scene;
 
     static public function main(){
@@ -25,56 +26,30 @@ class Game{
         var frag = js.Browser.window.fetch("main.frag").then(function (response){
             return response.text();
         });
-        var mqo = js.Browser.window.fetch("sample.mqo").then(function (response){
+        var mqo = js.Browser.window.fetch("uc2.mqo").then(function (response){
             return response.text();
         });
-        var tex = new js.Promise(function(resolve, reject){
-            new Texture("sample.png", resolve); 
-        });
 
-        js.Promise.all([vert, frag, tex, mqo]).then(function (response){
+        js.Promise.all([vert, frag, mqo]).then(function (response){
             var vert = cast (response[0], String);
             var frag = cast (response[1], String);
-            var tex = cast (response[2], Texture);
-            var mqo = cast (response[3], String);
+            var mqo = cast (response[2], String);
 
             var parser = new src.parser.MqoParser(mqo, gd);
             var x = parser.getMqo();
+            var a = new src.content.contentreaders.ModelReader(gd);
+            meshes = a.makeMeshesFromMqo(x);
 
-            // var shader = new Shader(vert, frag);
-
-            scene = new Scene();
-            var eye = new Vec3(0, 0.4, 1);
-            scene.setCamera(eye, eye.normalize(), new Vec3(0, 1, 0));
-
-            tex.setFilter(TextureFilter.Point);
-            // var mat = new Material(gd, shader, Color.Red, 0.0, 0.0, 0.0, tex);
-            var mat = x.materials[2];
-
-            var vertices : Array<Float> = [
-                new VertexPositionNormalTexture(new Vec3(0.0, 0.5, 0.0), new Vec3(0.0, 0.0, 0.0), new Vec2(0.0, 0.0)), 
-                new VertexPositionNormalTexture(new Vec3(0.5, 0.0, 0.5), new Vec3(0.0, 0.0, 0.0), new Vec2(1.0, 0.0)), 
-                new VertexPositionNormalTexture(new Vec3(-0.5, 0.0, -0.5), new Vec3(0.0, 0.0, 0.0), new Vec2(0.0, 1.0)),].flatten().flatten().array();
-
-            mesh = new Mesh(gd, scene, vertices, [0,1,2]);
-            var meshpart = new MeshPart(gd, mat, 3, 0, mesh);
-            mesh.meshParts.add(meshpart);
-
-            var vertices2:Array<Float> = [
-                new VertexPositionNormalTexture(new Vec3(0.0, 0.5, 0.0), new Vec3(0.0, 0.0, 0.0), new Vec2(0.0, 0.0)), 
-                new VertexPositionNormalTexture(new Vec3(0.5, 0.0, -0.5), new Vec3(0.0, 0.0, 0.0), new Vec2(0.0, 1.0)), 
-                new VertexPositionNormalTexture(new Vec3(-0.5, 0.0, 0.5), new Vec3(0.0, 0.0, 0.0), new Vec2(1.0, 1.0)),].flatten().flatten().array();
-
-            mesh2 = new Mesh(gd, scene, vertices2, [0,1,2]);
-            var meshpart2 = new MeshPart(gd, mat, 3, 0, mesh2);
-            mesh2.meshParts.add(meshpart2);
+            scene = x.scene;
+            var eye = scene.camera.position + new Vec3(0, 400, 400);
+            scene.setCamera(eye, (eye - new Vec3(0, 400, 0)).normalize(), new Vec3(0, 1, 0));
 
             js.Browser.window.requestAnimationFrame(loop);
         });
     }
 
     static function init(){
-        var canvas = createCanvas(640, 480);
+        var canvas = createCanvas(1280, 960);
         gd = new GraphicsDevice(canvas);
     }
 
@@ -101,13 +76,14 @@ class Game{
         var eye = scene.camera.position;
         eye.x = eye.x * c - eye.z * s;
         eye.z = eye.x * s + eye.z * c;
-        scene.camera.forward = eye.normalize();
+        scene.camera.forward = (eye - new Vec3(0, 400, 0)).normalize();
     }
 
     static function render(dt : Float){
         gd.startRender();
-        mesh.render();
-        mesh2.render();
+        for(m in meshes){
+            m.render();
+        }
         gd.endRender();
     }
 }

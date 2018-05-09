@@ -9,7 +9,7 @@ import src.scene.Scene;
 class Material{
 
     public var shader(default, null):Shader;
-    var col:Color;
+    var col:Array<Float>;
     var dif:Float;
     var amb:Float;
     var spc:Float;
@@ -28,7 +28,24 @@ class Material{
     public function new(gd:GraphicsDevice, shader:Shader, col:Color, dif:Float, amb:Float, spc:Float, tex:Texture){
         this.gd = gd;
         this.shader = shader;
-        this.col = col;
+        this.col = switch(col){
+            case Red :
+                [1.0, 0.0, 0.0, 1.0];
+            case Green :
+                [0.0, 1.0, 0.0, 1.0];
+            case Blue :
+                [0.0, 0.0, 1.0, 1.0];
+            case Black :
+                [0.0, 0.0, 0.0, 1.0];
+            case White :
+                [1.0, 1.0, 1.0, 1.0];
+            case Clear :
+                [0.0, 0.0, 0.0, 0.0];
+            case Rgb(r, g, b) :
+                [r, g, b, 1.0];
+            case Rgba(r, g, b, a) :
+                [r, g, b, a];
+        }
         this.dif = dif;
         this.amb = amb;
         this.spc = spc;
@@ -53,27 +70,9 @@ class Material{
         }
 
         // Uniform変数の設定
-        gd.uniformMatrix4fv(transMatrixLocation, false, Mat4.identity);
+        gd.uniformMatrix4fv(transMatrixLocation, false, Mat4.scale(new Vec3(6,6,6)));
         gd.uniformMatrix4fv(viewMatrixLocation, false, Mat4.lookAt(scene.camera));
-        gd.uniformMatrix4fv(projMatrixLocation, false, Mat4.perspective(1, Math.PI / 2, 0.1, 5));
-        var color = switch(col){
-            case Red :
-                [1.0, 0.0, 0.0, 1.0];
-            case Green :
-                [0.0, 1.0, 0.0, 1.0];
-            case Blue :
-                [0.0, 0.0, 1.0, 1.0];
-            case Black :
-                [0.0, 0.0, 0.0, 1.0];
-            case White :
-                [1.0, 1.0, 1.0, 1.0];
-            case Clear :
-                [0.0, 0.0, 0.0, 0.0];
-            case Rgb(r, g, b) :
-                [r, g, b, 1.0];
-            case Rgba(r, g, b, a) :
-                [r, g, b, a];
-        }
-        gd.uniform4fv(colorLocation, color);
+        gd.uniformMatrix4fv(projMatrixLocation, false, Mat4.perspective(1280/960, Math.PI / 2, 100, 10000));
+        gd.uniform4fv(colorLocation, col);
     }
 }
