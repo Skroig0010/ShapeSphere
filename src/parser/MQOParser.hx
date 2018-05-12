@@ -62,7 +62,7 @@ class MqoParser{
         var vertices = new Array<Vec3>();
         var faces = new Array<MqoFace>();
         eatSymbol("Object");
-        eatString();
+        var name = getString();
         eatLBrace();
         while(lexer.getToken() != null){
             switch(lexer.getToken()){
@@ -105,7 +105,7 @@ class MqoParser{
                                          throw "unexpected symbol found :" + lexer.getToken() + " in Object chunk";
             }
         }
-        return new MqoObject(vertices, faces);
+        return new MqoObject(name, vertices, faces);
     }
 
     function getVertexChunk(num : Int) : Array<Vec3>{
@@ -229,8 +229,7 @@ class MqoParser{
         var color : Color = White;
         var dif = 0.0, amb = 0.0, spc = 0.0;
         var tex : Texture = null;
-        // 最初のmoveNextでマテリアル名を食べる
-        lexer.moveNext();
+        var name = getString();
         while(lexer.getToken() != null){
             switch(lexer.getToken()){
                 case Symbol("shader") :
@@ -287,7 +286,7 @@ class MqoParser{
                     trace("Don't match " + lexer.getToken());
             }
         }
-        return new Material(gd, shader, color, dif, amb, spc, tex);
+        return new Material(gd, name, shader, color, dif, amb, spc, tex);
     }
 
 

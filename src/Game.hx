@@ -20,20 +20,12 @@ class Game{
 
     static public function main(){
         init();
-        var vert = js.Browser.window.fetch("main.vert").then(function (response){
-            return response.text();
-        });
-        var frag = js.Browser.window.fetch("main.frag").then(function (response){
-            return response.text();
-        });
         var mqo = js.Browser.window.fetch("uc2.mqo").then(function (response){
             return response.text();
         });
 
-        js.Promise.all([vert, frag, mqo]).then(function (response){
-            var vert = cast (response[0], String);
-            var frag = cast (response[1], String);
-            var mqo = cast (response[2], String);
+        js.Promise.all([mqo]).then(function (response){
+            var mqo = cast (response[0], String);
 
             var parser = new src.parser.MqoParser(mqo, gd);
             var x = parser.getMqo();
@@ -82,7 +74,7 @@ class Game{
     static function render(dt : Float){
         gd.startRender();
         for(m in meshes){
-            m.render();
+            m.render(Mat4.scale(new Vec3(6,6,6)), Mat4.lookAt(scene.camera), Mat4.perspective(1280/960, Math.PI / 2, 100, 10000));
         }
         gd.endRender();
     }

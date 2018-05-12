@@ -4,10 +4,10 @@ import js.html.webgl.UniformLocation;
 import src.graphics.GraphicsDevice;
 import src.graphics.shader.Shader;
 import src.math.*;
-import src.scene.Scene;
 
 class Material{
 
+    public var name : String;
     public var shader(default, null):Shader;
     var col:Array<Float>;
     var dif:Float;
@@ -25,9 +25,10 @@ class Material{
     var colorLocation : UniformLocation;
 
 
-    public function new(gd:GraphicsDevice, shader:Shader, col:Color, dif:Float, amb:Float, spc:Float, tex:Texture){
+    public function new(gd:GraphicsDevice, name : String, shader:Shader, col:Color, dif:Float, amb:Float, spc:Float, tex:Texture){
         this.gd = gd;
         this.shader = shader;
+        this.name = name;
         this.col = switch(col){
             case Red :
                 [1.0, 0.0, 0.0, 1.0];
@@ -61,7 +62,7 @@ class Material{
         }
     }
 
-    public function apply(scene : Scene){
+    public function apply(world : Mat4, view : Mat4, projection : Mat4){
         shader.useProgram();
         // Textureがあれば設定
         if(tex != null){
@@ -70,9 +71,9 @@ class Material{
         }
 
         // Uniform変数の設定
-        gd.uniformMatrix4fv(transMatrixLocation, false, Mat4.scale(new Vec3(6,6,6)));
-        gd.uniformMatrix4fv(viewMatrixLocation, false, Mat4.lookAt(scene.camera));
-        gd.uniformMatrix4fv(projMatrixLocation, false, Mat4.perspective(1280/960, Math.PI / 2, 100, 10000));
+        gd.uniformMatrix4fv(transMatrixLocation, false, world);
+        gd.uniformMatrix4fv(viewMatrixLocation, false, view);
+        gd.uniformMatrix4fv(projMatrixLocation, false, projection);
         gd.uniform4fv(colorLocation, col);
     }
 }

@@ -90,7 +90,7 @@ class ModelReader{
             meshParts.push(new MeshPart(gd, mqo.materials[key], partIndices.get(key).length, offset * 2/*short型なので2バイト*/, null));
             offset += partIndices.get(key).length;
         }
-        mesh = new Mesh(gd, mqo.scene, vertices.flatten().flatten().array(), indices);
+        mesh = new Mesh(gd, object.name, vertices.flatten().flatten().array(), indices);
         for(part in meshParts){
             part.setParent(mesh);
         }

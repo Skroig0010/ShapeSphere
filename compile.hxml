@@ -11,6 +11,7 @@ src.graphics.GraphicsExtensions
 src.graphics.Material
 src.graphics.Mesh
 src.graphics.MeshPart
+src.graphics.Model
 src.graphics.Texture
 
 src.graphics.shader.Shader

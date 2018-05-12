@@ -14,15 +14,15 @@ class Texture{
     inline static var rc = RenderingContext;
 
     public function new(src : String){
-        img = new Image();
-        img.src = src;
         GraphicsDevice.gl.activeTexture(rc.TEXTURE0);
         var texture = GraphicsDevice.gl.createTexture();
         GraphicsDevice.gl.bindTexture(rc.TEXTURE_2D, texture);
-        GraphicsDevice.gl.texImage2D(rc.TEXTURE_2D, 0, rc.RGBA, 2, 2, 0, rc.RGBA, rc.UNSIGNED_BYTE, new js.html.Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
+        GraphicsDevice.gl.texImage2D(rc.TEXTURE_2D, 0, rc.RGBA, 1, 1, 0, rc.RGBA, rc.UNSIGNED_BYTE, new js.html.Uint8Array([255, 255, 255, 255]));
         GraphicsDevice.gl.generateMipmap(rc.TEXTURE_2D);
         GraphicsDevice.gl.bindTexture(rc.TEXTURE_2D, null);
         tex = texture;
+        img = new Image();
+        img.src = src;
         img.onload = function(_){
             GraphicsDevice.gl.bindTexture(rc.TEXTURE_2D, texture);
             GraphicsDevice.gl.texImage2D(rc.TEXTURE_2D, 0, rc.RGBA, rc.RGBA, rc.UNSIGNED_BYTE, img);
