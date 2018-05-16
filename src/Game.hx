@@ -13,14 +13,12 @@ class Game{
     // requestAnimationFrameの引数前回値
     static var prevTime : Float;
 
-    static var mesh : Mesh;
-    static var mesh2 : Mesh;
-    static var meshes : Array<Mesh>;
+    static var model : Model;
     static var scene : Scene;
 
     static public function main(){
         init();
-        var mqofile = js.Browser.window.fetch("uc2.mqo").then(function (response){
+        var mqofile = js.Browser.window.fetch("Body.mqo").then(function (response){
             return response.text();
         });
 
@@ -32,15 +30,15 @@ class Game{
             var mqofile = cast (response[0], String);
             var xfile = cast (response[1], String);
 
-            // var mparser = new src.parser.MqoParser(mqofile, gd);
-            // var mqo = mparser.getMqo();
-            // var reader = new src.content.contentreaders.ModelReader(gd);
-            // meshes = reader.makeMeshesFromMqo(mqo);
+            var mparser = new src.parser.MqoParser(mqofile, gd);
+            var mqo = mparser.getMqo();
+            var reader = new src.content.contentreaders.ModelReader(gd);
+            model = reader.makeModelFromMqo(mqo);
 
             var xparser = new src.parser.XParser(xfile);
             var x = xparser.getX();
 
-            // scene = mqo.scene;
+            scene = mqo.scene;
             var eye = scene.camera.position + new Vec3(0, 400, 400);
             scene.setCamera(eye, (eye - new Vec3(0, 400, 0)).normalize(), new Vec3(0, 1, 0));
 
@@ -81,9 +79,7 @@ class Game{
 
     static function render(dt : Float){
         gd.startRender();
-        for(m in meshes){
-            m.render(Mat4.scale(new Vec3(6,6,6)), Mat4.lookAt(scene.camera), Mat4.perspective(1280/960, Math.PI / 2, 100, 10000));
-        }
+        model.render(Mat4.scale(new Vec3(6,6,6)), Mat4.lookAt(scene.camera), Mat4.perspective(1280/960, Math.PI / 2, 100, 10000));
         gd.endRender();
     }
 }

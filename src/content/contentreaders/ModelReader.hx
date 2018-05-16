@@ -1,5 +1,6 @@
 package src.content.contentreaders;
 import src.graphics.GraphicsDevice;
+import src.graphics.Model;
 import src.graphics.Mesh;
 import src.graphics.MeshPart;
 import src.graphics.vertices.VertexPositionNormalTexture;
@@ -15,7 +16,7 @@ class ModelReader{
         this.gd = gd;
     }
 
-    public function makeMeshesFromMqo(mqo : Mqo) : Array<Mesh>{
+    public function makeModelFromMqo(mqo : Mqo) : Model{
         // 基本1オブジェクトに対して1Mesh1MeshPart
         // faceを見て複数マテリアルがあったらMeshPartを増やす
         // 頂点及びマテリアルが被っていてUVが異なる物があったら頂点分ける
@@ -26,7 +27,7 @@ class ModelReader{
         for(obj in mqo.objects){
             meshes.push(makeMeshFromMqoObject(obj, mqo));
         }
-        return meshes;
+        return new Model(gd, meshes, null);
     }
 
     function makeMeshFromMqoObject(object : MqoObject, mqo : Mqo) : Mesh{

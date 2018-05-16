@@ -36,9 +36,9 @@ class Model{
     }
 
     public function render(world : Mat4, view : Mat4, projection : Mat4){
-			copyAbsoluteBoneTransformsTo(sharedDrawBoneMatrices);
+        //copyAbsoluteBoneTransformsTo(sharedDrawBoneMatrices);
         for(mesh in meshes){
-            mesh.render(world * sharedDrawBoneMatrices[mesh.parentBone.index], view, projection);
+            mesh.render(world/* * sharedDrawBoneMatrices[mesh.parentBone.index]*/, view, projection);
         }
     }
 
