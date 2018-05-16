@@ -33,6 +33,8 @@ src.math.Vec2
 src.math.Vec2Data
 src.math.Vec3
 src.math.Vec3Data
+src.math.Vec4
+src.math.Vec4Data
 src.math.Mat4
 src.math.Mat4Data
 
@@ -40,6 +42,14 @@ src.parser.Mqo
 src.parser.MqoLexer
 src.parser.MqoParser
 src.parser.MqoVal
+src.parser.X
+src.parser.XFrame
+src.parser.XLexer
+src.parser.XMaterial
+src.parser.XMesh
+src.parser.XMeshMaterialList
+src.parser.XParser
+src.parser.XVal
 
 src.scene.Scene
 -js build/Game.js

@@ -14,6 +14,7 @@ class ModelReader{
     public function new(gd : GraphicsDevice){
         this.gd = gd;
     }
+
     public function makeMeshesFromMqo(mqo : Mqo) : Array<Mesh>{
         // 基本1オブジェクトに対して1Mesh1MeshPart
         // faceを見て複数マテリアルがあったらMeshPartを増やす

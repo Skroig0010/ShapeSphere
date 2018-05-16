@@ -13,6 +13,7 @@ class Material{
     var dif:Float;
     var amb:Float;
     var spc:Float;
+    var pow:Float;
     var tex:Texture;
 
     var gd : GraphicsDevice;
@@ -25,7 +26,7 @@ class Material{
     var colorLocation : UniformLocation;
 
 
-    public function new(gd:GraphicsDevice, name : String, shader:Shader, col:Color, dif:Float, amb:Float, spc:Float, tex:Texture){
+    public function new(gd:GraphicsDevice, name : String, shader:Shader, col:Color, dif:Float, amb:Float, spc:Float, pow : Float, tex:Texture){
         this.gd = gd;
         this.shader = shader;
         this.name = name;
@@ -50,6 +51,7 @@ class Material{
         this.dif = dif;
         this.amb = amb;
         this.spc = spc;
+        this.pow = pow;
         this.tex = tex;
 
         // Uniform変数の適用

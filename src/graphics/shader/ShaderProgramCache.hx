@@ -18,8 +18,8 @@ class ShaderProgramCache{
     }
 
     function link(vert : String, frag : String) : Shader{
-        var v = haxe.Http.requestUrl(vert + ".vert");
-        var f = haxe.Http.requestUrl(frag + ".frag");
+        var v = haxe.Http.requestUrl("shader/" + vert + ".vert");
+        var f = haxe.Http.requestUrl("shader/" + frag + ".frag");
         return new Shader(v, f);
     }
 }

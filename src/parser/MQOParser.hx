@@ -129,7 +129,7 @@ class MqoParser{
     }
 
     function getFace() : MqoFace{
-        if(getInt() != 3){
+        if(!eatInt(3)){
             throw "face vertex number must be 3";
         }
         var indices : Array<Int> = null;
@@ -215,7 +215,6 @@ class MqoParser{
                     break;
                 default :
                     lexer.moveNext();
-                    continue;
             }
         }
         var scene = new Scene();
@@ -227,7 +226,7 @@ class MqoParser{
     function getMaterial() : Material{
         var shader : Shader = null;
         var color : Color = White;
-        var dif = 0.0, amb = 0.0, spc = 0.0;
+        var dif = 0.0, amb = 0.0, spc = 0.0, pow = 0.0;
         var tex : Texture = null;
         var name = getString();
         while(lexer.getToken() != null){
@@ -270,7 +269,7 @@ class MqoParser{
                 case Symbol("power") :
                     eatSymbol();
                     eatLParen();
-                    getFloat();
+                    pow = getFloat();
                     eatRParen();
                 case Symbol("tex") :
                     eatSymbol();
@@ -286,7 +285,7 @@ class MqoParser{
                     trace("Don't match " + lexer.getToken());
             }
         }
-        return new Material(gd, name, shader, color, dif, amb, spc, tex);
+        return new Material(gd, name, shader, color, dif, amb, spc, pow, tex);
     }
 
 
@@ -306,7 +305,7 @@ class MqoParser{
             case StringVal(s) :
                 lexer.moveNext();
                 s;
-            default : throw "Float cannot found. You found " + lexer.getToken();
+            default : throw "String cannot found. You found " + lexer.getToken();
         }
     }
 
@@ -327,28 +326,14 @@ class MqoParser{
             case IntVal(i) : 
                 lexer.moveNext();
                 i;
-            default : throw "Float cannot found. You found " + lexer.getToken();
+            default : throw "Int cannot found. You found " + lexer.getToken();
         }
     }
 
     function getVec3() : Vec3{
-        var x = switch(lexer.getToken()){
-            case FloatVal(f) : f;
-            case IntVal(i) : i;
-            default : throw "vec3 parameters must be numbers";
-        }
-        lexer.moveNext();
-        var y = switch(lexer.getToken()){
-            case FloatVal(f) : f;
-            case IntVal(i) : i;
-            default : throw "vec3 parameters must be numbers";
-        }
-        lexer.moveNext();
-        var z = switch(lexer.getToken()){
-            case FloatVal(f) : f;
-            case IntVal(i) : i;
-            default : throw "vec3 parameters must be numbers";
-        }
+        var x = getFloat();
+        var y = getFloat();
+        var z = getFloat();
         return new Vec3(x, y, z);
     }
 
@@ -402,7 +387,7 @@ class MqoParser{
         }
     }
 
-    // (を食べる
+    // }を食べる
     function eatRBrace() : Bool{
         switch(lexer.getToken()){
             case RBrace :

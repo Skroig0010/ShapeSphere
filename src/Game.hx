@@ -20,19 +20,27 @@ class Game{
 
     static public function main(){
         init();
-        var mqo = js.Browser.window.fetch("uc2.mqo").then(function (response){
+        var mqofile = js.Browser.window.fetch("uc2.mqo").then(function (response){
             return response.text();
         });
 
-        js.Promise.all([mqo]).then(function (response){
-            var mqo = cast (response[0], String);
+        var xfile = js.Browser.window.fetch("test_meshonly.x").then(function (response){
+            return response.text();
+        });
 
-            var parser = new src.parser.MqoParser(mqo, gd);
-            var x = parser.getMqo();
-            var a = new src.content.contentreaders.ModelReader(gd);
-            meshes = a.makeMeshesFromMqo(x);
+        js.Promise.all([mqofile, xfile]).then(function (response){
+            var mqofile = cast (response[0], String);
+            var xfile = cast (response[1], String);
 
-            scene = x.scene;
+            // var mparser = new src.parser.MqoParser(mqofile, gd);
+            // var mqo = mparser.getMqo();
+            // var reader = new src.content.contentreaders.ModelReader(gd);
+            // meshes = reader.makeMeshesFromMqo(mqo);
+
+            var xparser = new src.parser.XParser(xfile);
+            var x = xparser.getX();
+
+            // scene = mqo.scene;
             var eye = scene.camera.position + new Vec3(0, 400, 400);
             scene.setCamera(eye, (eye - new Vec3(0, 400, 0)).normalize(), new Vec3(0, 1, 0));
 
