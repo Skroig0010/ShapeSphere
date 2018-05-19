@@ -104,20 +104,61 @@ class XParser{
         // 他のデータオブジェクト読み込み
         var matList : XMeshMaterialList = null;
         var texCoords : Array<Vec2> = null;
+        var normals : XMeshNormals = null;
         while(lexer.getToken() != null){
             switch(lexer.getToken()){
                 case Symbol("MeshMaterialList") : // MeshMaterialList読み込み
                     matList = getMeshMaterialList();
                 case Symbol("MeshTextureCoords") : // MeshTextureCoords読み込み
                     texCoords = getMeshTextureCoords();
+                case Symbol("MeshNormals") :
+                    normals = getMeshNormals();
                 case RBrace :
                     eatRBrace();
                     break;
-                default : // MeshNormalsなど必要ないデータオブジェクトは捨てる
+                default : // 必要ないデータオブジェクトは捨てる
                     skipDataObject();
             }
         }
-        return new XMesh(vertices, faces, matList, texCoords);
+        return new XMesh(vertices, faces, matList, normals, texCoords);
+    }
+
+    function getMeshNormals() : XMeshNormals{
+        eatSymbol("MeshNormals");
+        eatLBrace();
+        var numNormal = getInt();
+        eatSemiColon();
+        var normals = new Array<Vec3>();
+        for(i in 0...numNormal){
+            normals.push(getVec3());
+            if(i != numNormal - 1){
+                eatComma();
+            }
+        }
+        eatSemiColon();
+
+        var numFace = getInt();
+        eatSemiColon();
+        var faces = new Array<Array<Int>>();
+        for(i in 0...numFace){
+            if(getInt() != 3){
+                throw "face vertex number must be 3";
+            }
+            eatSemiColon();
+            var face = new Array<Int>();
+            for(j in 0...3){
+                face.push(getInt());
+                if(j != 2)eatComma();
+            }
+            eatSemiColon();
+            faces.push(face);
+            if(i != numFace - 1){
+                eatComma();
+            }
+        }
+        eatSemiColon();
+        eatRBrace();
+        return new XMeshNormals(normals, faces);
     }
 
     function getMeshTextureCoords() : Array<Vec2>{

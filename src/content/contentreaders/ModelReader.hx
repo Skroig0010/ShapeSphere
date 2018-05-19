@@ -83,23 +83,17 @@ class ModelReader{
         var materials = xMesh.meshMaterialList;
         for(faceIndex in 0...xMesh.faces.length){
             var face = xMesh.faces[faceIndex];
-            // 法線計算
-            var normal = (xMesh.vertices[face[1]] - xMesh.vertices[face[0]]).cross(
-                    xMesh.vertices[face[2]] - xMesh.vertices[face[0]]).normalize();
+
             // まだ見ぬマテリアルを使った場合配列を作る
             if(!partIndices.exists(materials.faceIndices[faceIndex])){
                 partIndices.set(materials.faceIndices[faceIndex], new Array<Int>());
             }
             for(i in 0...3){
-                if(vertices[face[i]] == null){
-                    vertices[face[i]] = (new VertexPositionNormalTexture(
-                                xMesh.vertices[face[i]],
-                                normal,
-                                xMesh.meshTextureCoords[face[i]]));
-                    partIndices.get(materials.faceIndices[faceIndex]).push(face[i]);
-                }else{
-                    vertices[face[i]].normal += normal;
-                } 
+                vertices[face[i]] = (new VertexPositionNormalTexture(
+                            xMesh.vertices[face[i]],
+                            xMesh.meshNormals.normals[face[i]],
+                            xMesh.meshTextureCoords[face[i]]));
+                partIndices.get(materials.faceIndices[faceIndex]).push(face[i]);
             }
         }
         var indices = new Array<Int>();
@@ -135,13 +129,13 @@ class ModelReader{
         var indexMap = new Map<Int, Array<Int>>();
         for(face in object.faces){
             // 法線の計算
-            var normal = (object.vertices[face.indices[1]] - object.vertices[face.indices[0]]).cross(
-                    object.vertices[face.indices[2]] - object.vertices[face.indices[0]]).normalize();
+            var normal = (object.vertices[face.indices[2]] - object.vertices[face.indices[0]]).cross(
+                    object.vertices[face.indices[1]] - object.vertices[face.indices[0]]).normalize();
             // まだ見ぬマテリアルがあった場合配列を作っておく
             if(!partIndices.exists(face.material)){
                 partIndices.set(face.material, new Array<Int>());
             }
-            for(i in 0...3){
+            for(i in [0, 2, 1]){
                 if(!indexMap.exists(face.indices[i])){
                     // 初めてみた頂点
                     indexMap.set(face.indices[i], new Array<Int>());

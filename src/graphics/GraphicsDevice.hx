@@ -22,6 +22,7 @@ class GraphicsDevice{
             js.Browser.alert(e);
         }
         gl.enable(RenderingContext.DEPTH_TEST);
+        gl.enable(RenderingContext.CULL_FACE);
         // gl.enable(RenderingContext.BLEND);
         // gl.blendFunc(RenderingContext.SRC_ALPHA, RenderingContext.ONE_MINUS_SRC_ALPHA);
         gl.viewport(0, 0, canvas.width, canvas.height);

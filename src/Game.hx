@@ -17,7 +17,7 @@ class Game{
     static var model2 : Model;
     static var scene : Scene;
 
-    static var screen = {width : 640, height : 480};
+    static var screen = {width : 320, height : 240};
 
     static public function main(){
         init();
@@ -45,7 +45,7 @@ class Game{
 
             // scene = mqo.scene;
             scene = new Scene();
-            var position  = new Vec3(0, 150, 350);
+            var position  = new Vec3(0, 450, 10);
             var eye = position;
             scene.setCamera(eye, new Vec3(0, 0, 0), new Vec3(0, 1, 0));
 
