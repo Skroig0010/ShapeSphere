@@ -5,6 +5,13 @@ class XLexer{
     var text : String;
     var length : Int;
     var token : XVal;
+    var log = new List<XVal>();
+
+    public function showLog(){
+        for(tok in log){
+            trace(tok);
+        }
+    }
 
     public function new(text : String){
         this.text = text;
@@ -18,6 +25,10 @@ class XLexer{
     }
 
     public function moveNext() : Bool{
+        if(log.length > 50){
+            log.pop();
+        }
+        log.add(token);
         while(length > counter){
             switch(text.charAt(counter)){
                 case "{" :

@@ -1,12 +1,9 @@
 package src.content.contentreaders;
-import src.graphics.GraphicsDevice;
-import src.graphics.Model;
-import src.graphics.Mesh;
-import src.graphics.MeshPart;
+import src.graphics.*;
 import src.graphics.vertices.VertexPositionNormalTexture;
-import src.parser.Mqo;
-import src.parser.MqoObject;
+import src.parser.*;
 import src.scene.Scene;
+import src.math.*;
 
 using Lambda;
 
@@ -28,6 +25,101 @@ class ModelReader{
             meshes.push(makeMeshFromMqoObject(obj, mqo));
         }
         return new Model(gd, meshes, null);
+    }
+
+    public function makeModelFromX(x : X) : Model{
+        var meshes : Array<Mesh> = makeMeshesFromXFrame(x.root);
+        var rootBone = makeBoneTreeFromXFrame(x.root, null);
+        var bones = makeBonesFromBoneTree(rootBone);
+        return new Model(gd, meshes, bones);
+    }
+
+    function makeMeshesFromXFrame(frame : XFrame) : Array<Mesh>{
+        var meshes = new Array<Mesh>();
+        if(frame.mesh != null)meshes.push(makeMeshFromXMesh(frame.mesh, frame.name));
+        for(f in frame.frames){
+            meshes = meshes.concat(makeMeshesFromXFrame(f));
+        }
+        return meshes;
+    }
+
+
+    function makeBoneTreeFromXFrame(frame : XFrame, parent : Bone) : Bone{
+        var children = new Array<Bone>();
+        var bone = new Bone(frame.name, children, frame.mat, Mat4.identity, parent, 0);
+        for(f in frame.frames){
+            children.push(makeBoneTreeFromXFrame(f, bone));
+        }
+        return bone;
+    }
+
+    function makeBonesFromBoneTree(root : Bone) : Array<Bone>{
+        var index = 0;
+        var bones = new Array<Bone>();
+        var boneQueue = new List<Bone>();
+        boneQueue.push(root);
+        // 幅優先
+        while(boneQueue.length > 0){
+            var selectedBone = boneQueue.pop();
+            selectedBone.index = index;
+            bones.push(selectedBone);
+            index++;
+
+            // 子を詰める
+            for(bone in selectedBone.children){
+                boneQueue.push(bone);
+            }
+        }
+            return bones;
+    }
+
+    function makeMeshFromXMesh(xMesh : XMesh, name : String) : Mesh{
+        // 今回頂点を増やさないで良い
+        // Materialが複数ある場合はパーツを分ける
+        var vertices = new Array<VertexPositionNormalTexture>();
+        var mesh : Mesh;
+        var partIndices = new Map<Int, Array<Int>>();
+
+        var materials = xMesh.meshMaterialList;
+        for(faceIndex in 0...xMesh.faces.length){
+            var face = xMesh.faces[faceIndex];
+            // 法線計算
+            var normal = (xMesh.vertices[face[1]] - xMesh.vertices[face[0]]).cross(
+                    xMesh.vertices[face[2]] - xMesh.vertices[face[0]]).normalize();
+            // まだ見ぬマテリアルを使った場合配列を作る
+            if(!partIndices.exists(materials.faceIndices[faceIndex])){
+                partIndices.set(materials.faceIndices[faceIndex], new Array<Int>());
+            }
+            for(i in 0...3){
+                if(vertices[face[i]] == null){
+                    vertices[face[i]] = (new VertexPositionNormalTexture(
+                                xMesh.vertices[face[i]],
+                                normal,
+                                xMesh.meshTextureCoords[face[i]]));
+                    partIndices.get(materials.faceIndices[faceIndex]).push(face[i]);
+                }else{
+                    vertices[face[i]].normal += normal;
+                } 
+            }
+        }
+        var indices = new Array<Int>();
+        var meshParts = new Array<MeshPart>();
+        var offset = 0;
+        for(key in partIndices.keys()){
+            indices = indices.concat(partIndices.get(key));
+            meshParts.push(new MeshPart(gd, makeMaterialFromXMaterial(materials.materials[key]), partIndices.get(key).length, offset * 2/*short型なので2バイト*/, null));
+            offset += partIndices.get(key).length;
+        }
+        mesh = new Mesh(gd, name, vertices.flatten().flatten().array(), indices);
+        for(part in meshParts){
+            part.setParent(mesh);
+        }
+        return mesh;
+    }
+
+    function makeMaterialFromXMaterial(xMat : XMaterial) : Material{
+        return new Material(gd, xMat.name, gd.shaderProgramCache.getProgram("classic", "classic"),
+                xMat.color, 0, 0, 0, 0, xMat.tex);
     }
 
     function makeMeshFromMqoObject(object : MqoObject, mqo : Mqo) : Mesh{

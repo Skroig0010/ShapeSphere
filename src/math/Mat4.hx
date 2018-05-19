@@ -123,7 +123,7 @@ abstract Mat4(Mat4Data) from Mat4Data to Mat4Data{
 
     public static inline function lookAt(camera : Camera){
         var eye = camera.position;
-        var forward = camera.forward;
+        var forward = (camera.position - camera.lookat).normalize();
         var up = camera.up;
         var side = up.cross(forward).normalize();
         up = forward.cross(side).normalize();

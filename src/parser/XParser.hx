@@ -142,6 +142,7 @@ class XParser{
 
     function getMeshMaterialList() : XMeshMaterialList{
         eatSymbol("MeshMaterialList");
+        eatLBrace();
         var matNum = getInt();
         eatSemiColon();
         var faceNum = getInt();
@@ -162,6 +163,7 @@ class XParser{
         for(i in 0...matNum){
             materials.push(getMaterial());
         }
+        eatRBrace();
         return new XMeshMaterialList(faceIndices, materials);
     }
 
@@ -169,6 +171,7 @@ class XParser{
         eatSymbol("Material");
 
         var name = getSymbol();
+        eatLBrace();
 
         var r = getFloat(); eatSemiColon();
         var g = getFloat(); eatSemiColon();
@@ -199,6 +202,7 @@ class XParser{
             eatSemiColon();
             eatRBrace();
         }
+        eatRBrace();
 
         return new XMaterial(name, color, pow, spc, emi, tex);
     }

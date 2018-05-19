@@ -14,7 +14,10 @@ class Game{
     static var prevTime : Float;
 
     static var model : Model;
+    static var model2 : Model;
     static var scene : Scene;
+
+    static var screen = {width : 640, height : 480};
 
     static public function main(){
         init();
@@ -22,7 +25,7 @@ class Game{
             return response.text();
         });
 
-        var xfile = js.Browser.window.fetch("test_meshonly.x").then(function (response){
+        var xfile = js.Browser.window.fetch("body.x").then(function (response){
             return response.text();
         });
 
@@ -30,24 +33,28 @@ class Game{
             var mqofile = cast (response[0], String);
             var xfile = cast (response[1], String);
 
+            var reader = new src.content.contentreaders.ModelReader(gd);
+
             var mparser = new src.parser.MqoParser(mqofile, gd);
             var mqo = mparser.getMqo();
-            var reader = new src.content.contentreaders.ModelReader(gd);
             model = reader.makeModelFromMqo(mqo);
 
             var xparser = new src.parser.XParser(xfile);
             var x = xparser.getX();
+            model2 = reader.makeModelFromX(x);
 
-            scene = mqo.scene;
-            var eye = scene.camera.position + new Vec3(0, 400, 400);
-            scene.setCamera(eye, (eye - new Vec3(0, 400, 0)).normalize(), new Vec3(0, 1, 0));
+            // scene = mqo.scene;
+            scene = new Scene();
+            var position  = new Vec3(0, 150, 350);
+            var eye = position;
+            scene.setCamera(eye, new Vec3(0, 0, 0), new Vec3(0, 1, 0));
 
             js.Browser.window.requestAnimationFrame(loop);
         });
     }
 
     static function init(){
-        var canvas = createCanvas(1280, 960);
+        var canvas = createCanvas(screen.width, screen.height);
         gd = new GraphicsDevice(canvas);
     }
 
@@ -74,12 +81,12 @@ class Game{
         var eye = scene.camera.position;
         eye.x = eye.x * c - eye.z * s;
         eye.z = eye.x * s + eye.z * c;
-        scene.camera.forward = (eye - new Vec3(0, 400, 0)).normalize();
     }
 
     static function render(dt : Float){
         gd.startRender();
-        model.render(Mat4.scale(new Vec3(6,6,6)), Mat4.lookAt(scene.camera), Mat4.perspective(1280/960, Math.PI / 2, 100, 10000));
+        model.render(Mat4.translate(new Vec3(35, 0, 0)) * Mat4.scale(new Vec3(2, 2, 2)), Mat4.lookAt(scene.camera), Mat4.perspective(1280/960, Math.PI / 2, 10, 1000000));
+        model2.render(Mat4.rotateX(3.141592653589793238 / 2) * Mat4.scale(new Vec3(236, 236, 236)), Mat4.lookAt(scene.camera), Mat4.perspective(screen.width / screen.height, Math.PI / 2, 10, 100000));
         gd.endRender();
     }
 }

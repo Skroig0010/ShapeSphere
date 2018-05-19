@@ -12,6 +12,6 @@ void main(void){
     float amb = 0.5;
     float dif = max(0., dot(normalize(normal), lightDir));
     float spc = pow(max(0., dot(toCamera, lightRef)), 10.);
-    gl_FragColor = vec4((amb + dif) * color.xyz + spc * 0.1, 1) * texture2D(texture, uv);
+    gl_FragColor = vec4((amb + dif) + color.xyz * 0.0 + spc * 0.1, 1) * texture2D(texture, uv);
     // gl_FragColor = vec4((amb + dif) * color.xyz + spc * 0.1, 1);
 }
