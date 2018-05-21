@@ -1,9 +1,9 @@
 package src.graphics;
 import js.html.webgl.RenderingContext;
 import js.html.webgl.UniformLocation;
-import src.graphics.GraphicsDevice;
 import src.graphics.shader.Shader;
 import src.math.*;
+using src.graphics.GraphicsExtensions;
 
 class Material{
 
@@ -30,24 +30,7 @@ class Material{
         this.gd = gd;
         this.shader = shader;
         this.name = name;
-        this.col = switch(col){
-            case Red :
-                [1.0, 0.0, 0.0, 1.0];
-            case Green :
-                [0.0, 1.0, 0.0, 1.0];
-            case Blue :
-                [0.0, 0.0, 1.0, 1.0];
-            case Black :
-                [0.0, 0.0, 0.0, 1.0];
-            case White :
-                [1.0, 1.0, 1.0, 1.0];
-            case Clear :
-                [0.0, 0.0, 0.0, 0.0];
-            case Rgb(r, g, b) :
-                [r, g, b, 1.0];
-            case Rgba(r, g, b, a) :
-                [r, g, b, a];
-        }
+        this.col = col.toArray();
         this.dif = dif;
         this.amb = amb;
         this.spc = spc;

@@ -10,7 +10,7 @@ varying vec3 position;
 
 void main(void){
     uv = TextureCoordinate;
-    normal = Normal;
+    normal = mat3(transMatrix) * Normal;
     position = Position;
     gl_Position = projMatrix * viewMatrix * transMatrix * vec4(Position, 1.);
 }

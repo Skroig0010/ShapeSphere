@@ -32,6 +32,11 @@ abstract Vec3(Vec3Data) from Vec3Data to Vec3Data{
         return v1.x == v2.x && v1.y == v2.y && v1.z == v2.z;
     }
 
+    @:op(A!=B)
+    public static inline function neqals(v1 : Vec3, v2 : Vec3) : Bool{
+        return !equals(v1, v2);
+    }
+
     public inline function dot(v : Vec3)return this.x * v.x + this.y * v.y + this.z * v.z;
 
     public inline function cross(v : Vec3)return new Vec3(

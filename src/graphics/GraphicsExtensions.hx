@@ -1,176 +1,164 @@
 package src.graphics;
 import src.graphics.vertices.*;
 import js.html.webgl.*;
+import src.math.*;
 
 class GraphicsExtensions{
     public static function numberOfElements(elementFormat : VertexElementFormat){
-        switch(elementFormat){
-            case VertexElementFormat.Single:
-                return 1;
+        return switch(elementFormat){
+            case VertexElementFormat.Single: 1;
 
-            case VertexElementFormat.Vector2:
-                return 2;
+            case VertexElementFormat.Vector2: 2;
 
-            case VertexElementFormat.Vector3:
-                return 3;
+            case VertexElementFormat.Vector3: 3;
 
-            case VertexElementFormat.Vector4:
-                return 4;
+            case VertexElementFormat.Vector4: 4;
 
-            case VertexElementFormat.Color:
-                return 4;
+            case VertexElementFormat.Color: 4;
 
-            case VertexElementFormat.Byte4:
-                return 4;
+            case VertexElementFormat.Byte4: 4;
 
-            case VertexElementFormat.Short2:
-                return 2;
+            case VertexElementFormat.Short2: 2;
 
-            case VertexElementFormat.Short4:
-                return 4;
+            case VertexElementFormat.Short4: 4;
 
-            case VertexElementFormat.NormalizedShort2:
-                return 2;
+            case VertexElementFormat.NormalizedShort2: 2;
 
-            case VertexElementFormat.NormalizedShort4:
-                return 4;
+            case VertexElementFormat.NormalizedShort4: 4;
 
-            case VertexElementFormat.HalfVector2:
-                return 2;
+            case VertexElementFormat.HalfVector2: 2;
 
-            case VertexElementFormat.HalfVector4:
-                return 4;
+            case VertexElementFormat.HalfVector4: 4;
+            default : throw "argument exception";
         }
-        throw "argument exception";
     }
 
     public static function vertexAttribPointerType(elementFormat : VertexElementFormat){
-        switch(elementFormat){
-            case VertexElementFormat.Single:
-                return RenderingContext.FLOAT;
+        return switch(elementFormat){
+            case VertexElementFormat.Single: RenderingContext.FLOAT;
 
-            case VertexElementFormat.Vector2:
-                return RenderingContext.FLOAT;
+            case VertexElementFormat.Vector2: RenderingContext.FLOAT;
 
-            case VertexElementFormat.Vector3:
-                return RenderingContext.FLOAT;
+            case VertexElementFormat.Vector3: RenderingContext.FLOAT;
 
-            case VertexElementFormat.Vector4:
-                return RenderingContext.FLOAT;
+            case VertexElementFormat.Vector4: RenderingContext.FLOAT;
 
-            case VertexElementFormat.Color:
-                return RenderingContext.UNSIGNED_BYTE;
+            case VertexElementFormat.Color: RenderingContext.FLOAT;
 
-            case VertexElementFormat.Byte4:
-                return RenderingContext.UNSIGNED_BYTE;
+            case VertexElementFormat.Byte4: RenderingContext.UNSIGNED_BYTE;
 
-            case VertexElementFormat.Short2:
-                return RenderingContext.SHORT;
+            case VertexElementFormat.Short2: RenderingContext.SHORT;
 
-            case VertexElementFormat.Short4:
-                return RenderingContext.SHORT;
+            case VertexElementFormat.Short4: RenderingContext.SHORT;
 
-            case VertexElementFormat.NormalizedShort2:
-                return RenderingContext.SHORT;
+            case VertexElementFormat.NormalizedShort2: RenderingContext.SHORT;
 
-            case VertexElementFormat.NormalizedShort4:
-                return RenderingContext.SHORT;
+            case VertexElementFormat.NormalizedShort4: RenderingContext.SHORT;
 
-            case VertexElementFormat.HalfVector2:
-                return RenderingContext.LOW_FLOAT;
+            case VertexElementFormat.HalfVector2: RenderingContext.LOW_FLOAT;
 
-            case VertexElementFormat.HalfVector4:
-                return RenderingContext.LOW_FLOAT;
+            case VertexElementFormat.HalfVector4: RenderingContext.LOW_FLOAT;
+            default : throw "argument exception";
         }
-        throw "argument exception";
     }
 
     public static function vertexAttribNormalized(element : VertexElement){
         if(element.usage == VertexElementUsage.Color)
             return true;
 
-        switch(element.format){
-            case VertexElementFormat.NormalizedShort2:
-                return true;
-            case VertexElementFormat.NormalizedShort4:
-                return true;
-
-            default:
-                return false;
+        return switch(element.format){
+            case VertexElementFormat.NormalizedShort2: true;
+            case VertexElementFormat.NormalizedShort4: true;
+            default: false;
         }
     }
 
     public static function getName(usage : VertexElementUsage){
-        switch(usage){
-            case VertexElementUsage.Position:
-                return "Position";
-            case VertexElementUsage.Color:
-                return "Color";
-            case VertexElementUsage.TextureCoordinate:
-                return "TextureCoordinate";
-            case VertexElementUsage.Normal:
-                return "Normal";
-            case VertexElementUsage.Binormal:
-                return "Binormal";
-            case VertexElementUsage.Tangent:
-                return "Tangent";
-            case VertexElementUsage.BlendIndices:
-                return "BlendIndices";
-            case VertexElementUsage.BlendWeight:
-                return "BlendWeight";
-            case VertexElementUsage.Depth:
-                return "Depth";
-            case VertexElementUsage.Fog:
-                return "Fog";
-            case VertexElementUsage.PointSize:
-                return "PointSize";
-            case VertexElementUsage.Sample:
-                return "Sample";
-            case VertexElementUsage.TessellateFactor:
-                return "TessellateFactor";
+        return switch(usage){
+            case VertexElementUsage.Position: "Position";
+            case VertexElementUsage.Color: "Color";
+            case VertexElementUsage.TextureCoordinate: "TextureCoordinate";
+            case VertexElementUsage.Normal: "Normal";
+            case VertexElementUsage.Binormal: "Binormal";
+            case VertexElementUsage.Tangent: "Tangent";
+            case VertexElementUsage.BlendIndices: "BlendIndices";
+            case VertexElementUsage.BlendWeight: "BlendWeight";
+            case VertexElementUsage.Depth: "Depth";
+            case VertexElementUsage.Fog: "Fog";
+            case VertexElementUsage.PointSize: "PointSize";
+            case VertexElementUsage.Sample: "Sample";
+            case VertexElementUsage.TessellateFactor: "TessellateFactor";
         }
         throw "argument exception";
     }
 
     public static function getSize(elementFormat : VertexElementFormat){
-        switch(elementFormat){
-            case VertexElementFormat.Single:
-                return 4;
+        return switch(elementFormat){
+            case VertexElementFormat.Single: 4;
 
-            case VertexElementFormat.Vector2:
-                return 8;
+            case VertexElementFormat.Vector2: 8;
 
-            case VertexElementFormat.Vector3:
-                return 12;
+            case VertexElementFormat.Vector3: 12;
 
-            case VertexElementFormat.Vector4:
-                return 16;
+            case VertexElementFormat.Vector4: 16;
 
-            case VertexElementFormat.Color:
-                return 4;
+            case VertexElementFormat.Color: 16;
 
-            case VertexElementFormat.Byte4:
-                return 4;
+            case VertexElementFormat.Byte4: 4;
 
-            case VertexElementFormat.Short2:
-                return 4;
+            case VertexElementFormat.Short2: 4;
 
-            case VertexElementFormat.Short4:
-                return 8;
+            case VertexElementFormat.Short4: 8;
 
-            case VertexElementFormat.NormalizedShort2:
-                return 4;
+            case VertexElementFormat.NormalizedShort2: 4;
 
-            case VertexElementFormat.NormalizedShort4:
-                return 8;
+            case VertexElementFormat.NormalizedShort4: 8;
 
-            case VertexElementFormat.HalfVector2:
-                return 4;
+            case VertexElementFormat.HalfVector2: 4;
 
-            case VertexElementFormat.HalfVector4:
-                return 8;
+            case VertexElementFormat.HalfVector4: 8;
         }
-        return 0;
+    }
+    public static function toArray(color : Color){
+        return switch(color){
+            case Red :
+                [1.0, 0.0, 0.0, 1.0];
+            case Green :
+                [0.0, 1.0, 0.0, 1.0];
+            case Blue :
+                [0.0, 0.0, 1.0, 1.0];
+            case Black :
+                [0.0, 0.0, 0.0, 1.0];
+            case White :
+                [1.0, 1.0, 1.0, 1.0];
+            case Clear :
+                [0.0, 0.0, 0.0, 0.0];
+            case Rgb(r, g, b) :
+                [r, g, b, 1.0];
+            case Rgba(r, g, b, a) :
+                [r, g, b, a];
+        }
+    }
+
+    public static function toVec4(color : Color){
+        return switch(color){
+            case Red :
+                new Vec4(1.0, 0.0, 0.0, 1.0);
+            case Green :
+                new Vec4(0.0, 1.0, 0.0, 1.0);
+            case Blue :
+                new Vec4(0.0, 0.0, 1.0, 1.0);
+            case Black :
+                new Vec4(0.0, 0.0, 0.0, 1.0);
+            case White :
+                new Vec4(1.0, 1.0, 1.0, 1.0);
+            case Clear :
+                new Vec4(0.0, 0.0, 0.0, 0.0);
+            case Rgb(r, g, b) :
+                new Vec4(r, g, b, 1.0);
+            case Rgba(r, g, b, a) :
+                new Vec4(r, g, b, a);
+        }
     }
 
 }

@@ -17,7 +17,7 @@ class Game{
     static var model2 : Model;
     static var scene : Scene;
 
-    static var screen = {width : 320, height : 240};
+    static var screen = {width : 800, height : 600};
 
     static public function main(){
         init();
@@ -45,7 +45,7 @@ class Game{
 
             // scene = mqo.scene;
             scene = new Scene();
-            var position  = new Vec3(0, 450, 10);
+            var position  = new Vec3(0, 450, 410);
             var eye = position;
             scene.setCamera(eye, new Vec3(0, 0, 0), new Vec3(0, 1, 0));
 
@@ -73,6 +73,12 @@ class Game{
         prevTime = time;
         update(dt);
         render(dt);
+        gd.debugPrimitive.setPrimitive(Point(new Vec3(200, 0, 0), 10), Red, false);
+        gd.debugPrimitive.setPrimitive(Point(new Vec3(0, 200, 0), 10), Green, false);
+        gd.debugPrimitive.setPrimitive(Point(new Vec3(0, 0, 200), 10), Blue, false);
+        gd.debugPrimitive.setPrimitive(Line(new Vec3(0, 0, 0), new Vec3(200, 0, 0)), Red, false);
+        gd.debugPrimitive.setPrimitive(Line(new Vec3(0, 0, 0), new Vec3(0, 200, 0)), Green, false);
+        gd.debugPrimitive.setPrimitive(Line(new Vec3(0, 0, 0), new Vec3(0, 0, 200)), Blue, false);
     }
 
     static function update(dt : Float){
@@ -87,6 +93,7 @@ class Game{
         gd.startRender();
         model.render(Mat4.translate(new Vec3(35, 0, 0)) * Mat4.scale(new Vec3(2, 2, 2)), Mat4.lookAt(scene.camera), Mat4.perspective(1280/960, Math.PI / 2, 10, 1000000));
         model2.render(Mat4.rotateX(3.141592653589793238 / 2) * Mat4.scale(new Vec3(236, 236, 236)), Mat4.lookAt(scene.camera), Mat4.perspective(screen.width / screen.height, Math.PI / 2, 10, 100000));
+        gd.debugPrimitive.drawPrimitives(Mat4.lookAt(scene.camera), Mat4.perspective(screen.width / screen.height, Math.PI / 2, 10, 100000));
         gd.endRender();
     }
 }

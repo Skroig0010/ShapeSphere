@@ -121,6 +121,35 @@ abstract Mat4(Mat4Data) from Mat4Data to Mat4Data{
           0,   0, v.z,   0,
           0,   0,   0,   1]);
 
+    public inline function invert(){
+        var det = 1 / (
+                this.m[0] * this.m[4] * this.m[8] + 
+                this.m[3] * this.m[7] * this.m[2] + 
+                this.m[6] * this.m[1] * this.m[5] -
+                this.m[6] * this.m[4] * this.m[2] -
+                this.m[3] * this.m[1] * this.m[8] -
+                this.m[0] * this.m[7] * this.m[5]);
+        var m = [
+            (this.m[4] * this.m[8] - this.m[7] * this.m[5]) / det,
+            (this.m[7] * this.m[2] - this.m[1] * this.m[8]) / det,
+            (this.m[1] * this.m[5] - this.m[4] * this.m[2]) / det,
+            (this.m[6] * this.m[5] - this.m[3] * this.m[8]) / det,
+            (this.m[0] * this.m[8] - this.m[6] * this.m[2]) / det,
+            (this.m[3] * this.m[2] - this.m[0] * this.m[5]) / det,
+            (this.m[3] * this.m[7] - this.m[6] * this.m[4]) / det,
+            (this.m[6] * this.m[1] - this.m[0] * this.m[7]) / det,
+            (this.m[0] * this.m[4] - this.m[3] * this.m[1]) / det];
+
+        return new Mat4([
+                m[0], m[1], m[2], 0,
+                m[3], m[4], m[5], 0,
+                m[6], m[7], m[8], 0,
+                m[0] * this.m[12] + m[3] * this.m[13] + m[6] * this.m[14],
+                m[1] * this.m[12] + m[4] * this.m[13] + m[7] * this.m[14],
+                m[1] * this.m[12] + m[4] * this.m[13] + m[7] * this.m[14],
+                0]);
+    }
+
     public static inline function lookAt(camera : Camera){
         var eye = camera.position;
         var forward = (camera.position - camera.lookat).normalize();
@@ -142,4 +171,5 @@ abstract Mat4(Mat4Data) from Mat4Data to Mat4Data{
                 0            ,     0,     (near + far) / (near - far), -1,
                 0            ,     0,   2 * near * far / (near - far),  0]);
     }
+
 }

@@ -2,6 +2,7 @@ package src.graphics;
 import js.html.webgl.*;
 import src.graphics.vertices.*;
 import src.graphics.shader.ShaderProgramCache;
+import src.graphics.DebugPrimitive;
 
 class GraphicsDevice{
     public static var gl:RenderingContext;
@@ -11,6 +12,8 @@ class GraphicsDevice{
     public var indexBuffer : Buffer;
 
     public var shaderProgramCache : ShaderProgramCache;
+
+    public var debugPrimitive : DebugPrimitive;
 
     public function new(canvas : js.html.CanvasElement){
         try {
@@ -33,8 +36,10 @@ class GraphicsDevice{
                 RenderingContext.DEPTH_BUFFER_BIT);
         maxVertexAttributes = gl.getParameter(RenderingContext.MAX_VERTEX_ATTRIBS);
         shaderProgramCache = new ShaderProgramCache(this);
+        debugPrimitive = new DebugPrimitive(this);
 
         uniform1i = gl.uniform1i;
+        uniform1f = gl.uniform1f;
         uniform4fv = gl.uniform4fv;
         uniformMatrix4fv = gl.uniformMatrix4fv;
     }
@@ -45,14 +50,24 @@ class GraphicsDevice{
         gl.viewport(0, 0, width, height);
     }
 
+    public function createDynamicBuffer()return gl.createBuffer();
+
+    public function arrayBufferData(buffer, vertices : Array<Float>){
+        gl.bindBuffer(RenderingContext.ARRAY_BUFFER, buffer);
+        gl.bufferData(RenderingContext.ARRAY_BUFFER, cast new js.html.Float32Array(cast vertices), RenderingContext.DYNAMIC_DRAW);
+        gl.bindBuffer(RenderingContext.ARRAY_BUFFER, null);
+    }
+
+    public function indexBufferData(buffer, indices : Array<Int>){
+        gl.bindBuffer(RenderingContext.ELEMENT_ARRAY_BUFFER, buffer);
+        gl.bufferData(RenderingContext.ELEMENT_ARRAY_BUFFER, cast new js.html.Int16Array(cast indices), RenderingContext.DYNAMIC_DRAW);
+        gl.bindBuffer(RenderingContext.ELEMENT_ARRAY_BUFFER, null);
+    }
+
     public function createArrayBuffer(vertices : Array<Float>) : Buffer{
         var buffer = gl.createBuffer();
-        gl.bindBuffer(
-                RenderingContext.ARRAY_BUFFER, buffer);
-        gl.bufferData(
-                RenderingContext.ARRAY_BUFFER,
-                cast new js.html.Float32Array(cast vertices),
-                RenderingContext.STATIC_DRAW);
+        gl.bindBuffer(RenderingContext.ARRAY_BUFFER, buffer);
+        gl.bufferData(RenderingContext.ARRAY_BUFFER, cast new js.html.Float32Array(cast vertices), RenderingContext.STATIC_DRAW);
         gl.bindBuffer(RenderingContext.ARRAY_BUFFER, null);
         return buffer;
     }
@@ -82,11 +97,19 @@ class GraphicsDevice{
     }*/
 
     public var uniform1i(default, null) : UniformLocation -> Int -> Void;
+    public var uniform1f(default, null) : UniformLocation -> Float -> Void;
 
     public var uniform4fv(default, null) : UniformLocation -> Array<Float> -> Void;
 
     public var uniformMatrix4fv(default, null) : UniformLocation -> Bool -> Array<Float> -> Void;
 
+    public function drawArrays(mode : Int, first : Int, count : Int, ?declaration : VertexDeclaration, shader : src.graphics.shader.Shader){
+        if(declaration != null){
+            declaration.gd = this;
+            declaration.apply(shader, 0);
+        }
+        gl.drawArrays(mode, first, count);
+    }
     public function drawElements(mode : Int, offset : Int, count : Int, ?declaration : VertexDeclaration, shader : src.graphics.shader.Shader){
         if(declaration != null){
             declaration.gd = this;

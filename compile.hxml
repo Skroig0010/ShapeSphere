@@ -6,6 +6,8 @@ src.content.ContentManager
 src.content.contentreaders.ModelReader
 
 src.graphics.Color
+src.graphics.DebugPrimitive
+src.graphics.DebugPrimitiveShape
 src.graphics.GraphicsDevice
 src.graphics.GraphicsExtensions
 src.graphics.Material
