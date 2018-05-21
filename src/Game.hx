@@ -79,6 +79,7 @@ class Game{
         gd.debugPrimitive.setPrimitive(Line(new Vec3(0, 0, 0), new Vec3(200, 0, 0)), Red, false);
         gd.debugPrimitive.setPrimitive(Line(new Vec3(0, 0, 0), new Vec3(0, 200, 0)), Green, false);
         gd.debugPrimitive.setPrimitive(Line(new Vec3(0, 0, 0), new Vec3(0, 0, 200)), Blue, false);
+        gd.debugPrimitive.setPrimitive(AABB(new Vec3(150, 350, 50), new Vec3(-150, 0, -50)), White, false);
     }
 
     static function update(dt : Float){

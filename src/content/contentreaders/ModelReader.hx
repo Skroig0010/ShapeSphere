@@ -129,8 +129,8 @@ class ModelReader{
         var indexMap = new Map<Int, Array<Int>>();
         for(face in object.faces){
             // 法線の計算
-            var normal = (object.vertices[face.indices[2]] - object.vertices[face.indices[0]]).cross(
-                    object.vertices[face.indices[1]] - object.vertices[face.indices[0]]).normalize();
+            var normal = (object.vertices[face.indices[1]] - object.vertices[face.indices[0]]).cross(
+                    object.vertices[face.indices[2]] - object.vertices[face.indices[0]]).normalize();
             // まだ見ぬマテリアルがあった場合配列を作っておく
             if(!partIndices.exists(face.material)){
                 partIndices.set(face.material, new Array<Int>());

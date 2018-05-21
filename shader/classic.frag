@@ -6,7 +6,7 @@ varying vec2 uv;
 varying vec3 normal;
 
 void main(void){
-    vec3 lightDir = normalize(vec3(0,0,-1));
+    vec3 lightDir = normalize(vec3(0,-1,-1));
     vec3 toCamera = normalize(position);
     vec3 lightRef = reflect(lightDir, normalize(normal));
     float amb = 0.5;
