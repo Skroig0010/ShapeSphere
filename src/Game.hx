@@ -25,7 +25,7 @@ class Game{
             return response.text();
         });
 
-        var xfile = js.Browser.window.fetch("body.x").then(function (response){
+        var xfile = js.Browser.window.fetch("test2.x").then(function (response){
             return response.text();
         });
 

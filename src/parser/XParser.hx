@@ -23,15 +23,123 @@ class XParser{
             trace("64bit floating point number type will be cast 32bit.");
         }
         var frame : XFrame = null;
+        var animationSet : XAnimationSet = null;
         while(lexer.getToken() != null){
             switch(lexer.getToken()){
                 case Symbol("Frame") :
                     frame = getFrame();
+                case Symbol("AnimationSet") :
+                    animationSet = getAnimationSet();
                 default :
                     skipDataObject();
             }
         }
-        return new X(frame);
+        return new X(frame, animationSet);
+    }
+
+    function getAnimationSet() : XAnimationSet{
+        eatSymbol("AnimationSet");
+        var name = getSymbol();
+        var animations = new Array<XAnimation>();
+
+        eatLBrace();
+
+        while(lexer.getToken() != null){
+            switch(lexer.getToken()){
+                case Symbol("Animation") : 
+                    animations.push(getAnimation());
+                case RBrace :
+                    eatRBrace();
+                    break;
+                default :
+                    throw "Unexpected val in frame : " + lexer.getToken();
+            }
+        }
+        return new XAnimationSet(name, animations);
+    }
+    function getAnimation() : XAnimation{
+        eatSymbol("Animation");
+        eatLBrace();
+        var boneName : String = "";
+        var rotationKey : XAnimationKey<Vec4> = null;
+        var scaleKey : XAnimationKey<Vec3> = null;
+        var positionKey : XAnimationKey<Vec3> = null;
+        while(lexer.getToken() != null){
+            switch(lexer.getToken()){
+                case LBrace :
+                    eatLBrace();
+                    boneName = getSymbol();
+                    eatRBrace();
+                case Symbol("AnimationKey") :
+                    var key = getAnimationKey();
+                    switch(key.type){
+                        case Rotation :
+                            rotationKey = cast(key);
+                        case Scale :
+                            scaleKey = cast(key);
+                        case Position :
+                            positionKey = cast(key);
+                    }
+                case RBrace :
+                    eatRBrace();
+                    break;
+                default :
+                    throw "Unexpected val in frame : " + lexer.getToken();
+            }
+        }
+        return new XAnimation(boneName, rotationKey, scaleKey, positionKey);
+    }
+
+    function getAnimationKey() : XAnimationKey<Dynamic>{
+        eatSymbol("AnimationKey");
+        eatLBrace();
+        var type = switch(getInt()){
+            case 0 : XKeyType.Rotation;
+            case 1 : XKeyType.Scale;
+            case 2 : XKeyType.Position;
+            default : throw "matrix type key does not implemented.";
+        };
+        eatSemiColon();
+        var frameNum = getInt();eatSemiColon();
+        var changed = false;
+        var keys = new Array<Dynamic>();
+        for(i in 0...frameNum){
+            if(i != getInt()){
+                throw "Keyframe number must correspond nKeys.";
+            }
+            eatSemiColon();
+            keys.push(switch(type){
+                case XKeyType.Rotation : 
+                    if(4 != getInt()) throw "unexpected error.";
+                    eatSemiColon();
+                    var t = getFloat();eatComma();
+                    var x = getFloat();eatComma();
+                    var y = getFloat();eatComma();
+                    var z = getFloat();eatSemiColon();
+                    new Vec4(t, x, y, z);
+                case XKeyType.Scale :
+                    if(3 != getInt()) throw "unexpected error";
+                    eatSemiColon();
+                    var x = getFloat();eatComma();
+                    var y = getFloat();eatComma();
+                    var z = getFloat();eatSemiColon();
+                    new Vec3(x, y, z);
+                case XKeyType.Position :
+                    if(3 != getInt()) throw "unexpected error";
+                    eatSemiColon();
+                    var x = getFloat();eatComma();
+                    var y = getFloat();eatComma();
+                    var z = getFloat();eatSemiColon();
+                    new Vec3(x, y, z);
+            });
+            eatSemiColon();
+            if(i != frameNum - 1){
+                eatComma();
+            }
+        }
+        eatSemiColon();
+        eatRBrace();
+        return new XAnimationKey(frameNum, keys, type, changed);
     }
 
     function getFrame() : XFrame{
@@ -264,7 +372,7 @@ class XParser{
             case Symbol(s) :
                 lexer.moveNext();
                 s;
-            default : throw "Symbol cannot found. You found " + lexer.getToken();
+            default : throw "Symbol doesn't found. You got " + lexer.getToken();
         }
     }
 
@@ -273,7 +381,7 @@ class XParser{
             case StringVal(s) :
                 lexer.moveNext();
                 s;
-            default : throw "String cannot found. You found " + lexer.getToken();
+            default : throw "String didn't found. You got " + lexer.getToken();
         }
     }
 
@@ -285,7 +393,7 @@ class XParser{
             case IntVal(f) :
                 lexer.moveNext();
                 f;
-            default : throw "Float cannot found. You found " + lexer.getToken();
+            default : throw "Float didn't found. You got " + lexer.getToken();
         }
     }
 
@@ -294,7 +402,7 @@ class XParser{
             case IntVal(i) : 
                 lexer.moveNext();
                 i;
-            default : throw "Int cannot found. You found " + lexer.getToken();
+            default : throw "Int didn't found. You got " + lexer.getToken();
         }
     }
 
@@ -315,6 +423,28 @@ class XParser{
         eatSemiColon();
         var z = getFloat();
         eatSemiColon();
+        var w = getFloat();
+        eatSemiColon();
+        return new Vec4(x, y, z, w);
+    }
+
+    function getScaleOrPosition() : Vec3{
+        var x = getFloat();
+        eatComma();
+        var y = getFloat();
+        eatComma();
+        var z = getFloat();
+        eatSemiColon();
+        return new Vec3(x, y, z);
+    }
+
+    function getQuaternion() : Vec4{
+        var x = getFloat();
+        eatComma();
+        var y = getFloat();
+        eatComma();
+        var z = getFloat();
+        eatComma();
         var w = getFloat();
         eatSemiColon();
         return new Vec4(x, y, z, w);

@@ -139,7 +139,7 @@ class XLexer{
         counter++;
         while(length > counter){
             switch(text.charAt(counter)){
-                case " ", "\t", "\n", "\r", "(", ")" :
+                case " ", "\t", "\n", "\r", "(", ")", "{", "}":
                     break;
                 default :
                     symbol += text.charAt(counter);
