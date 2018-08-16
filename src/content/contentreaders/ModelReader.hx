@@ -92,7 +92,8 @@ class ModelReader{
             for(i in 0...3){
                 vertices[face[i]] = (new VertexPositionNormalTexture(
                             xMesh.vertices[face[i]],
-                            xMesh.meshNormals.normals[faceIndex],
+                            // 以下は、メタセコで作ったモデルはface[i]に、直接Blenderで作ったモデルはfaceIndexにする
+                            xMesh.meshNormals.normals[if(xMesh.faces.length == xMesh.meshNormals.normals.length) faceIndex else face[i]],
                             xMesh.meshTextureCoords[face[i]]));
                 partIndices.get(materials.faceIndices[faceIndex]).push(face[i]);
             }
