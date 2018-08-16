@@ -1,7 +1,8 @@
-package src.parser;
-import src.graphics.*;
+package src.parser.x;
+import src.graphics.Color;
+import src.graphics.Texture;
 
-class XMaterial{
+class Material{
     public var name : String;
     public var color : Color;
     public var power : Float;

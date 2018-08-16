@@ -25,7 +25,7 @@ class Game{
             return response.text();
         });
 
-        var xfile = js.Browser.window.fetch("test2.x").then(function (response){
+        var xfile = js.Browser.window.fetch("body.x").then(function (response){
             return response.text();
         });
 
@@ -35,11 +35,11 @@ class Game{
 
             var reader = new src.content.contentreaders.ModelReader(gd);
 
-            var mparser = new src.parser.MqoParser(mqofile, gd);
+            var mparser = new src.parser.mqo.Parser(mqofile, gd);
             var mqo = mparser.getMqo();
             model = reader.makeModelFromMqo(mqo);
 
-            var xparser = new src.parser.XParser(xfile);
+            var xparser = new src.parser.x.Parser(xfile);
             var x = xparser.getX();
             model2 = reader.makeModelFromX(x);
 

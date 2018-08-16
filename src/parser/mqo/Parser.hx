@@ -1,27 +1,28 @@
-package src.parser;
+package src.parser.mqo;
 import src.graphics.Color;
 import src.graphics.GraphicsDevice;
 import src.graphics.Mesh;
 import src.graphics.MeshPart;
-import src.graphics.Material;
+import src.graphics.IMaterial;
+import src.graphics.MqoMaterial;
 import src.graphics.Texture;
 import src.graphics.shader.Shader;
 import src.graphics.vertices.VertexPositionTexture;
 import src.scene.Scene;
 import src.math.*;
 
-class MqoParser{
-    var lexer : MqoLexer;
+class Parser{
+    var lexer : Lexer;
     var gd : GraphicsDevice;
     public function new(text : String, gd : GraphicsDevice){
-        lexer = new MqoLexer(text);
+        lexer = new Lexer(text);
         this.gd = gd;
     }
 
     public function getMqo() : Mqo{
         var scene = new Scene();
-        var materials = new Array<Material>();
-        var objects = new Array<MqoObject>();
+        var materials = new Array<IMaterial>();
+        var objects = new Array<Object>();
         if(!(eatSymbol("Metasequoia") && eatSymbol("Document") &&
                     eatSymbol("Format") && eatSymbol("Text") &&
                     eatSymbol("Ver") && eatFloat())){
@@ -58,9 +59,9 @@ class MqoParser{
         return new Mqo(scene, materials, objects);
     }
 
-    function getObject() : MqoObject{ 
+    function getObject() : Object{ 
         var vertices = new Array<Vec3>();
-        var faces = new Array<MqoFace>();
+        var faces = new Array<Face>();
         eatSymbol("Object");
         var name = getString();
         eatLBrace();
@@ -105,7 +106,7 @@ class MqoParser{
                                          throw "unexpected symbol found :" + lexer.getToken() + " in Object chunk";
             }
         }
-        return new MqoObject(name, vertices, faces);
+        return new Object(name, vertices, faces);
     }
 
     function getVertexChunk(num : Int) : Array<Vec3>{
@@ -118,9 +119,9 @@ class MqoParser{
         return vertices;
     }
 
-    function getFaceChunk(num : Int) : Array<MqoFace>{
+    function getFaceChunk(num : Int) : Array<Face>{
         eatLBrace();
-        var faces = new Array<MqoFace>();
+        var faces = new Array<Face>();
         for(i in 0...num){
             faces.push(getFace());
         }
@@ -128,7 +129,7 @@ class MqoParser{
         return faces;
     }
 
-    function getFace() : MqoFace{
+    function getFace() : Face{
         if(!eatInt(3)){
             throw "face vertex number must be 3";
         }
@@ -181,7 +182,7 @@ class MqoParser{
                     break;
             }
         }
-        return new MqoFace(indices, material, uv, col, crs);
+        return new Face(indices, material, uv, col, crs);
     }
 
     function getScene() : Scene{
@@ -223,7 +224,7 @@ class MqoParser{
 
     }
 
-    function getMaterial() : Material{
+    function getMaterial() : IMaterial{
         var shader : Shader = null;
         var color : Color = White;
         var dif = 0.0, amb = 0.0, spc = 0.0, pow = 0.0;
@@ -285,7 +286,7 @@ class MqoParser{
                     trace("Don't match " + lexer.getToken());
             }
         }
-        return new Material(gd, name, shader, color, dif, amb, spc, pow, tex);
+        return new MqoMaterial(gd, name, shader, color, dif, amb, spc, pow, tex);
     }
 
 

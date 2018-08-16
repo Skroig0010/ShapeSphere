@@ -1,6 +1,6 @@
-package src.parser;
+package src.parser.x;
 
-enum XKeyType{
+enum KeyType{
     Rotation;
     Scale;
     Position;

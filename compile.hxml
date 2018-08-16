@@ -10,7 +10,9 @@ src.graphics.DebugPrimitive
 src.graphics.DebugPrimitiveShape
 src.graphics.GraphicsDevice
 src.graphics.GraphicsExtensions
-src.graphics.Material
+src.graphics.MqoMaterial
+src.graphics.XMaterial
+src.graphics.IMaterial
 src.graphics.Mesh
 src.graphics.MeshPart
 src.graphics.Model
@@ -39,19 +41,21 @@ src.math.Vec4
 src.math.Vec4Data
 src.math.Mat4
 src.math.Mat4Data
+src.math.Quaternion
+src.math.QuaternionData
 
-src.parser.Mqo
-src.parser.MqoLexer
-src.parser.MqoParser
-src.parser.MqoVal
-src.parser.X
-src.parser.XFrame
-src.parser.XLexer
-src.parser.XMaterial
-src.parser.XMesh
-src.parser.XMeshMaterialList
-src.parser.XParser
-src.parser.XVal
+src.parser.mqo.Mqo
+src.parser.mqo.Lexer
+src.parser.mqo.Parser
+src.parser.mqo.Val
+src.parser.x.X
+src.parser.x.Frame
+src.parser.x.Lexer
+src.parser.x.Material
+src.parser.x.Mesh
+src.parser.x.MeshMaterialList
+src.parser.x.Parser
+src.parser.x.Val
 
 src.scene.Scene
 -js build/Game.js

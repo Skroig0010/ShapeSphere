@@ -4,6 +4,7 @@ import src.math.*;
 class Bone{
     public var name : String;
     public var children : Array<Bone>;
+    public var meshes : Array<Mesh>;
     public var localTransform : Mat4;
     public var modelTransform : Mat4;
     public var parent : Bone;
@@ -16,5 +17,13 @@ class Bone{
         this.modelTransform = modelTransform;
         this.parent = parent;
         this.index = index;
+    }
+
+    public function addMesh(mesh : Mesh){
+        meshes.push(mesh);
+    }
+
+    public function addChild(bone : Bone){
+        children.push(bone);
     }
 }

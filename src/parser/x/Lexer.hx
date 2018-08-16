@@ -1,10 +1,17 @@
-package src.parser;
+package src.parser.x;
 
-class MqoLexer{
+class Lexer implements ILexer<Val>{
     public var counter(default, null) : Int;
     var text : String;
     var length : Int;
-    var token : MqoVal;
+    var token : Val;
+    var log = new List<Val>();
+
+    public function showLog(){
+        for(tok in log){
+            trace(tok);
+        }
+    }
 
     public function new(text : String){
         this.text = text;
@@ -13,11 +20,15 @@ class MqoLexer{
         moveNext();
     }
 
-    public function getToken() : MqoVal{
+    public function getToken() : Val{
         return token;
     }
 
     public function moveNext() : Bool{
+        if(log.length > 50){
+            log.pop();
+        }
+        log.add(token);
         while(length > counter){
             switch(text.charAt(counter)){
                 case "{" :
@@ -28,13 +39,13 @@ class MqoLexer{
                     counter++;
                     token = RBrace;
                     return true;
-                case "(" :
+                case ";" :
                     counter++;
-                    token = LParen;
+                    token = SemiColon;
                     return true;
-                case ")" :
+                case "," :
                     counter++;
-                    token = RParen;
+                    token = Comma;
                     return true;
                 case "\"" :
                     token = getString();
@@ -45,6 +56,13 @@ class MqoLexer{
                 case " ", "\t", "\n", "\r":
                     counter++;
                     continue;
+                    case "/" :
+                    if(text.charAt(counter + 1) == "/"){
+                        skipComment();
+                        continue;
+                    }else{
+                        throw "what is this / char at " + (counter + 1);
+                    }
                 default :
                     token = getSymbol();
                     return true;
@@ -54,7 +72,7 @@ class MqoLexer{
         return false;
     }
 
-    function getString() : MqoVal{
+    function getString() : Val{
         if(text.charAt(counter) != "\""){
             return null;
         }
@@ -76,7 +94,7 @@ class MqoLexer{
         return StringVal(s);
     }
 
-    function getNumber() : MqoVal{
+    function getNumber() : Val{
         var number = text.charAt(counter);
         var isNegative = false;
         var isFloat = false;
@@ -116,12 +134,12 @@ class MqoLexer{
         }
     }
 
-    function getSymbol() : MqoVal{
+    function getSymbol() : Val{
         var symbol = text.charAt(counter);
         counter++;
         while(length > counter){
             switch(text.charAt(counter)){
-                case " ", "\t", "\n", "\r", "(", ")" :
+                case " ", "\t", "\n", "\r", "(", ")", "{", "}":
                     break;
                 default :
                     symbol += text.charAt(counter);
@@ -130,5 +148,15 @@ class MqoLexer{
         }
         return Symbol(symbol);
     }
-    
+
+    function skipComment(){
+        while(length > counter){
+            switch(text.charAt(counter)){
+                case "\r", "\n" :
+                    break;
+            }
+            counter++;
+        }
+    }
+
 }

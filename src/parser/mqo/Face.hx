@@ -1,8 +1,8 @@
-package src.parser;
+package src.parser.mqo;
 import src.math.Vec2;
 import src.graphics.Color;
 
-class MqoFace{
+class Face{
     public var indices : Array<Int>;
     public var material : Int;
     public var uv : Array<Vec2>;

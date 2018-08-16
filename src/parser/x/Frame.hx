@@ -1,13 +1,13 @@
-package src.parser;
+package src.parser.x;
 import src.math.*;
 
-class XFrame{
-    public var frames : Array<XFrame>;
+class Frame{
+    public var frames : Array<Frame>;
     public var mat : Mat4;
-    public var mesh : XMesh;
+    public var mesh : Mesh;
     public var name : String;
 
-    public function new(name : String, frames : Array<XFrame>, mat : Mat4, mesh : XMesh){
+    public function new(name : String, frames : Array<Frame>, mat : Mat4, mesh : Mesh){
         this.name = name;
         this.frames = frames;
         this.mat = mat;

@@ -5,16 +5,15 @@ import src.graphics.shader.Shader;
 import src.math.*;
 using src.graphics.GraphicsExtensions;
 
-class Material{
+class XMaterial implements IMaterial{
 
     public var name : String;
     public var shader(default, null):Shader;
-    var col:Array<Float>;
-    var dif:Float;
-    var amb:Float;
-    var spc:Float;
-    var pow:Float;
-    var tex:Texture;
+    var col : Array<Float>;
+    var pow : Float;
+    var spc : Array<Float>;
+    var emi : Array<Float>;
+    var tex : Texture;
 
     var gd : GraphicsDevice;
 
@@ -26,15 +25,14 @@ class Material{
     var colorLocation : UniformLocation;
 
 
-    public function new(gd:GraphicsDevice, name : String, shader:Shader, col:Color, dif:Float, amb:Float, spc:Float, pow : Float, tex:Texture){
+    public function new(gd : GraphicsDevice, name : String, shader : Shader, col : Color, pow : Float, spc : Color, emi : Color, tex : Texture){
         this.gd = gd;
         this.shader = shader;
         this.name = name;
         this.col = col.toArray();
-        this.dif = dif;
-        this.amb = amb;
-        this.spc = spc;
         this.pow = pow;
+        this.spc = spc.toArray();
+        this.emi = emi.toArray();
         this.tex = tex;
 
         // Uniform変数の適用

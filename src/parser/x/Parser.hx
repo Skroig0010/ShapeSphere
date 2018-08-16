@@ -1,12 +1,15 @@
-package src.parser;
-import src.graphics.*;
+package src.parser.x;
+// import src.graphics.*;
+import src.graphics.Color;
+import src.graphics.Texture;
+
 import src.math.*;
 
 
-class XParser{
-    var lexer : XLexer;
+class Parser{
+    var lexer : Lexer;
     public function new(text : String){
-        lexer = new XLexer(text);
+        lexer = new Lexer(text);
     }
 
     public function getX() : X{
@@ -22,8 +25,8 @@ class XParser{
         if(!eatInt(32)){
             trace("64bit floating point number type will be cast 32bit.");
         }
-        var frame : XFrame = null;
-        var animationSet : XAnimationSet = null;
+        var frame : Frame = null;
+        var animationSet : AnimationSet = null;
         while(lexer.getToken() != null){
             switch(lexer.getToken()){
                 case Symbol("Frame") :
@@ -37,10 +40,10 @@ class XParser{
         return new X(frame, animationSet);
     }
 
-    function getAnimationSet() : XAnimationSet{
+    function getAnimationSet() : AnimationSet{
         eatSymbol("AnimationSet");
         var name = getSymbol();
-        var animations = new Array<XAnimation>();
+        var animations = new Array<Animation>();
 
         eatLBrace();
 
@@ -55,15 +58,15 @@ class XParser{
                     throw "Unexpected val in frame : " + lexer.getToken();
             }
         }
-        return new XAnimationSet(name, animations);
+        return new AnimationSet(name, animations);
     }
-    function getAnimation() : XAnimation{
+    function getAnimation() : Animation{
         eatSymbol("Animation");
         eatLBrace();
         var boneName : String = "";
-        var rotationKey : XAnimationKey<Vec4> = null;
-        var scaleKey : XAnimationKey<Vec3> = null;
-        var positionKey : XAnimationKey<Vec3> = null;
+        var rotationKey : AnimationKey<Vec4> = null;
+        var scaleKey : AnimationKey<Vec3> = null;
+        var positionKey : AnimationKey<Vec3> = null;
         while(lexer.getToken() != null){
             switch(lexer.getToken()){
                 case LBrace :
@@ -87,16 +90,16 @@ class XParser{
                     throw "Unexpected val in frame : " + lexer.getToken();
             }
         }
-        return new XAnimation(boneName, rotationKey, scaleKey, positionKey);
+        return new Animation(boneName, rotationKey, scaleKey, positionKey);
     }
 
-    function getAnimationKey() : XAnimationKey<Dynamic>{
+    function getAnimationKey() : AnimationKey<Dynamic>{
         eatSymbol("AnimationKey");
         eatLBrace();
         var type = switch(getInt()){
-            case 0 : XKeyType.Rotation;
-            case 1 : XKeyType.Scale;
-            case 2 : XKeyType.Position;
+            case 0 : KeyType.Rotation;
+            case 1 : KeyType.Scale;
+            case 2 : KeyType.Position;
             default : throw "matrix type key does not implemented.";
         };
         eatSemiColon();
@@ -104,33 +107,37 @@ class XParser{
         var changed = false;
         var keys = new Array<Dynamic>();
         for(i in 0...frameNum){
-            if(i != getInt()){
-                throw "Keyframe number must correspond nKeys.";
-            }
+            if(i != getInt()) throw "Keyframe number must correspond nKeys.";
             eatSemiColon();
             keys.push(switch(type){
-                case XKeyType.Rotation : 
+                case KeyType.Rotation : 
                     if(4 != getInt()) throw "unexpected error.";
                     eatSemiColon();
                     var t = getFloat();eatComma();
                     var x = getFloat();eatComma();
                     var y = getFloat();eatComma();
                     var z = getFloat();eatSemiColon();
-                    new Vec4(t, x, y, z);
-                case XKeyType.Scale :
+                    var v = new Vec4(t, x, y, z);
+                    if (i != 0 && keys[0] != v)changed = true;
+                    v;
+                case KeyType.Scale :
                     if(3 != getInt()) throw "unexpected error";
                     eatSemiColon();
                     var x = getFloat();eatComma();
                     var y = getFloat();eatComma();
                     var z = getFloat();eatSemiColon();
-                    new Vec3(x, y, z);
-                case XKeyType.Position :
+                    var v = new Vec3(x, y, z);
+                    if (i != 0 && keys[0] != v)changed = true;
+                    v;
+                case KeyType.Position :
                     if(3 != getInt()) throw "unexpected error";
                     eatSemiColon();
                     var x = getFloat();eatComma();
                     var y = getFloat();eatComma();
                     var z = getFloat();eatSemiColon();
-                    new Vec3(x, y, z);
+                    var v = new Vec3(x, y, z);
+                    if (i != 0 && keys[0] != v)changed = true;
+                    v;
             });
             eatSemiColon();
             if(i != frameNum - 1){
@@ -139,15 +146,15 @@ class XParser{
         }
         eatSemiColon();
         eatRBrace();
-        return new XAnimationKey(frameNum, keys, type, changed);
+        return new AnimationKey(frameNum, keys, type, changed);
     }
 
-    function getFrame() : XFrame{
+    function getFrame() : Frame{
         eatSymbol("Frame");
         var name = getSymbol();
-        var frames = new Array<XFrame>();
+        var frames = new Array<Frame>();
         var mat : Mat4 = null;
-        var mesh : XMesh = null;
+        var mesh : Mesh = null;
 
         eatLBrace();
 
@@ -170,10 +177,10 @@ class XParser{
                     throw "Unexpected val in frame : " + lexer.getToken();
             }
         }
-        return new XFrame(name, frames, mat, mesh);
+        return new Frame(name, frames, mat, mesh);
     }
 
-    function getMesh() : XMesh{
+    function getMesh() : Mesh{
         eatSymbol("Mesh");
         eatLBrace();
 
@@ -210,9 +217,9 @@ class XParser{
         eatSemiColon();
 
         // 他のデータオブジェクト読み込み
-        var matList : XMeshMaterialList = null;
+        var matList : MeshMaterialList = new MeshMaterialList(new Array(), new Array());
         var texCoords : Array<Vec2> = null;
-        var normals : XMeshNormals = null;
+        var normals : MeshNormals = null;
         while(lexer.getToken() != null){
             switch(lexer.getToken()){
                 case Symbol("MeshMaterialList") : // MeshMaterialList読み込み
@@ -228,10 +235,10 @@ class XParser{
                     skipDataObject();
             }
         }
-        return new XMesh(vertices, faces, matList, normals, texCoords);
+        return new Mesh(vertices, faces, matList, normals, texCoords);
     }
 
-    function getMeshNormals() : XMeshNormals{
+    function getMeshNormals() : MeshNormals{
         eatSymbol("MeshNormals");
         eatLBrace();
         var numNormal = getInt();
@@ -266,7 +273,7 @@ class XParser{
         }
         eatSemiColon();
         eatRBrace();
-        return new XMeshNormals(normals, faces);
+        return new MeshNormals(normals, faces);
     }
 
     function getMeshTextureCoords() : Array<Vec2>{
@@ -289,7 +296,7 @@ class XParser{
         return uvs;
     }
 
-    function getMeshMaterialList() : XMeshMaterialList{
+    function getMeshMaterialList() : MeshMaterialList{
         eatSymbol("MeshMaterialList");
         eatLBrace();
         var matNum = getInt();
@@ -297,7 +304,7 @@ class XParser{
         var faceNum = getInt();
         eatSemiColon();
         var faceIndices = new Array<Int>();
-        var materials = new Array<XMaterial>();
+        var materials = new Array<Material>();
 
         // face読み込み
         for(i in 0...faceNum){
@@ -313,10 +320,10 @@ class XParser{
             materials.push(getMaterial());
         }
         eatRBrace();
-        return new XMeshMaterialList(faceIndices, materials);
+        return new MeshMaterialList(faceIndices, materials);
     }
 
-    function getMaterial() : XMaterial{
+    function getMaterial() : Material{
         eatSymbol("Material");
 
         var name = getSymbol();
@@ -353,7 +360,7 @@ class XParser{
         }
         eatRBrace();
 
-        return new XMaterial(name, color, pow, spc, emi, tex);
+        return new Material(name, color, pow, spc, emi, tex);
     }
 
     function eatSymbol(?s : String) : Bool{

@@ -1,7 +1,8 @@
 package src.content.contentreaders;
 import src.graphics.*;
 import src.graphics.vertices.VertexPositionNormalTexture;
-import src.parser.*;
+import src.parser.mqo.*;
+import src.parser.x.*;
 import src.scene.Scene;
 import src.math.*;
 
@@ -20,7 +21,7 @@ class ModelReader{
         // そのとき頂点Indexがかぶらないように後ろに追加していき、
         // 比較しやすいようにする
         // MeshPartができたらインデックスを順番にconcatすればOK
-        var meshes = new Array<Mesh>();
+        var meshes = new Array<src.graphics.Mesh>();
         for(obj in mqo.objects){
             meshes.push(makeMeshFromMqoObject(obj, mqo));
         }
@@ -28,14 +29,14 @@ class ModelReader{
     }
 
     public function makeModelFromX(x : X) : Model{
-        var meshes : Array<Mesh> = makeMeshesFromXFrame(x.root);
+        var meshes : Array<src.graphics.Mesh> = makeMeshesFromXFrame(x.root);
         var rootBone = makeBoneTreeFromXFrame(x.root, null);
         var bones = makeBonesFromBoneTree(rootBone);
         return new Model(gd, meshes, bones);
     }
 
-    function makeMeshesFromXFrame(frame : XFrame) : Array<Mesh>{
-        var meshes = new Array<Mesh>();
+    function makeMeshesFromXFrame(frame : Frame) : Array<src.graphics.Mesh>{
+        var meshes = new Array<src.graphics.Mesh>();
         if(frame.mesh != null)meshes.push(makeMeshFromXMesh(frame.mesh, frame.name));
         for(f in frame.frames){
             meshes = meshes.concat(makeMeshesFromXFrame(f));
@@ -44,7 +45,7 @@ class ModelReader{
     }
 
 
-    function makeBoneTreeFromXFrame(frame : XFrame, parent : Bone) : Bone{
+    function makeBoneTreeFromXFrame(frame : Frame, parent : Bone) : Bone{
         var children = new Array<Bone>();
         var bone = new Bone(frame.name, children, frame.mat, Mat4.identity, parent, 0);
         for(f in frame.frames){
@@ -73,11 +74,11 @@ class ModelReader{
             return bones;
     }
 
-    function makeMeshFromXMesh(xMesh : XMesh, name : String) : Mesh{
+    function makeMeshFromXMesh(xMesh : Mesh, name : String) : src.graphics.Mesh{
         // 今回頂点を増やさないで良い
         // Materialが複数ある場合はパーツを分ける
         var vertices = new Array<VertexPositionNormalTexture>();
-        var mesh : Mesh;
+        var mesh : src.graphics.Mesh;
         var partIndices = new Map<Int, Array<Int>>();
 
         var materials = xMesh.meshMaterialList;
@@ -91,7 +92,7 @@ class ModelReader{
             for(i in 0...3){
                 vertices[face[i]] = (new VertexPositionNormalTexture(
                             xMesh.vertices[face[i]],
-                            xMesh.meshNormals.normals[face[i]],
+                            xMesh.meshNormals.normals[faceIndex],
                             xMesh.meshTextureCoords[face[i]]));
                 partIndices.get(materials.faceIndices[faceIndex]).push(face[i]);
             }
@@ -104,21 +105,21 @@ class ModelReader{
             meshParts.push(new MeshPart(gd, makeMaterialFromXMaterial(materials.materials[key]), partIndices.get(key).length, offset * 2/*short型なので2バイト*/, null));
             offset += partIndices.get(key).length;
         }
-        mesh = new Mesh(gd, name, vertices.flatten().flatten().array(), indices);
+        mesh = new src.graphics.Mesh(gd, name, vertices.flatten().flatten().array(), indices);
         for(part in meshParts){
             part.setParent(mesh);
         }
         return mesh;
     }
 
-    function makeMaterialFromXMaterial(xMat : XMaterial) : Material{
-        return new Material(gd, xMat.name, gd.shaderProgramCache.getProgram("classic", "classic"),
-                xMat.color, 0, 0, 0, 0, xMat.tex);
+    function makeMaterialFromXMaterial(xMat : Material) : IMaterial{
+        return new src.graphics.XMaterial(gd, xMat.name, gd.shaderProgramCache.getProgram("classic", "classic"),
+                xMat.color, xMat.power, xMat.spc, xMat.emi, xMat.tex);
     }
 
-    function makeMeshFromMqoObject(object : MqoObject, mqo : Mqo) : Mesh{
+    function makeMeshFromMqoObject(object : Object, mqo : Mqo) : src.graphics.Mesh{
         var vertices = new Array<VertexPositionNormalTexture>();
-        var mesh : Mesh;
+        var mesh : src.graphics.Mesh;
         // Material番号をキーとする頂点インデックス
         var partIndices = new Map<Int, Array<Int>>();
         // 被りがあるかindexMapで検証
@@ -137,7 +138,7 @@ class ModelReader{
             }
             for(i in [0, 2, 1]){
                 if(!indexMap.exists(face.indices[i])){
-                    // 初めてみた頂点
+                    // 初めて見た頂点
                     indexMap.set(face.indices[i], new Array<Int>());
                     vertices[face.indices[i]] = (new VertexPositionNormalTexture(
                                 object.vertices[face.indices[i]],
@@ -178,7 +179,7 @@ class ModelReader{
             meshParts.push(new MeshPart(gd, mqo.materials[key], partIndices.get(key).length, offset * 2/*short型なので2バイト*/, null));
             offset += partIndices.get(key).length;
         }
-        mesh = new Mesh(gd, object.name, vertices.flatten().flatten().array(), indices);
+        mesh = new src.graphics.Mesh(gd, object.name, vertices.flatten().flatten().array(), indices);
         for(part in meshParts){
             part.setParent(mesh);
         }
