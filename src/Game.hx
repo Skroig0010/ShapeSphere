@@ -11,9 +11,9 @@ using Lambda;
 class Game{
     static public var gd : GraphicsDevice;
     // requestAnimationFrameの引数前回値
-    static var prevTime : Float;
+    static var prevTime : Float = 0.0;
 
-    static var model : Model;
+    // static var model : Model;
     static var model2 : Model;
     static var scene : Scene;
 
@@ -36,8 +36,8 @@ class Game{
             var reader = new src.content.contentreaders.ModelReader(gd);
 
             var mparser = new src.parser.mqo.Parser(mqofile, gd);
-            var mqo = mparser.getMqo();
-            model = reader.makeModelFromMqo(mqo);
+            // var mqo = mparser.getMqo();
+            // model = reader.makeModelFromMqo(mqo);
 
             var xparser = new src.parser.x.Parser(xfile);
             var x = xparser.getX();
@@ -80,20 +80,25 @@ class Game{
         gd.debugPrimitive.setPrimitive(Line(new Vec3(0, 0, 0), new Vec3(0, 200, 0)), Green, false);
         gd.debugPrimitive.setPrimitive(Line(new Vec3(0, 0, 0), new Vec3(0, 0, 200)), Blue, false);
         gd.debugPrimitive.setPrimitive(AABB(new Vec3(150, 350, 50), new Vec3(-150, 0, -50)), White, false);
+        gd.debugPrimitive.setPrimitive(Line(new Vec3(0, 0, 0), new Vec3(100.0, -100.0, 0.0)), White, false);
+        gd.debugPrimitive.setPrimitive(Line(new Vec3(0, 0, 0), new Vec3(-100.0, 100.0, 0.0)), White, false);
+        gd.debugPrimitive.setPrimitive(Line(new Vec3(0, 0, 0), new Vec3(-100.0, -100.0, 0.0)), White, false);
+        gd.debugPrimitive.setPrimitive(Line(new Vec3(0, 0, 0), new Vec3(100.0, 100.0, 0.0)), White, false);
     }
 
+    static private var timer : Float = 0.0;
+
     static function update(dt : Float){
-        var c = Math.cos(0.01);
-        var s = Math.sin(0.01);
+        timer += dt;
         var eye = scene.camera.position;
-        eye.x = eye.x * c - eye.z * s;
-        eye.z = eye.x * s + eye.z * c;
+        eye.x = 410 * Math.cos(timer / 500);
+        eye.z = 410 * Math.sin(timer / 500);
     }
 
     static function render(dt : Float){
         gd.startRender();
-        model.render(Mat4.translate(new Vec3(35, 0, 0)) * Mat4.scale(new Vec3(2, 2, 2)), Mat4.lookAt(scene.camera), Mat4.perspective(1280/960, Math.PI / 2, 10, 1000000));
-        model2.render(Mat4.rotateX(3.141592653589793238 / 2) * Mat4.scale(new Vec3(236, 236, 236)), Mat4.lookAt(scene.camera), Mat4.perspective(screen.width / screen.height, Math.PI / 2, 10, 100000));
+        model2.render(Mat4.rotateX(timer / 200) * Mat4.scale(new Vec3(100, 100, 100)), Mat4.lookAt(scene.camera), Mat4.perspective(screen.width / screen.height, Math.PI / 2, 10, 100000));
+        // model.render(Mat4.translate(new Vec3(35, 0, 0)) * Mat4.scale(new Vec3(2, 2, 2)), Mat4.lookAt(scene.camera), Mat4.perspective(1280/960, Math.PI / 2, 10, 1000000));
         gd.debugPrimitive.drawPrimitives(Mat4.lookAt(scene.camera), Mat4.perspective(screen.width / screen.height, Math.PI / 2, 10, 100000));
         gd.endRender();
     }

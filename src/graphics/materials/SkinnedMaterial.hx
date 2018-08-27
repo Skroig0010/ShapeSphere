@@ -1,11 +1,11 @@
-package src.graphics;
+package src.graphics.materials;
 import js.html.webgl.RenderingContext;
 import js.html.webgl.UniformLocation;
 import src.graphics.shader.Shader;
 import src.math.*;
 using src.graphics.GraphicsExtensions;
 
-class XMaterial implements IMaterial{
+class SkinnedMaterial implements IMaterial{
 
     public var name : String;
     public var shader(default, null):Shader;
@@ -14,6 +14,7 @@ class XMaterial implements IMaterial{
     var spc : Array<Float>;
     var emi : Array<Float>;
     var tex : Texture;
+    var bones : Array<Bone>;
 
     var gd : GraphicsDevice;
 
@@ -23,9 +24,10 @@ class XMaterial implements IMaterial{
     var projMatrixLocation : UniformLocation;
     var textureLocation : UniformLocation;
     var colorLocation : UniformLocation;
+    var bonesLocation = new Array<UniformLocation>();
 
 
-    public function new(gd : GraphicsDevice, name : String, shader : Shader, col : Color, pow : Float, spc : Color, emi : Color, tex : Texture){
+    public function new(gd : GraphicsDevice, name : String, shader : Shader, col : Color, pow : Float, spc : Color, emi : Color, tex : Texture, bones : Array<Bone>){
         this.gd = gd;
         this.shader = shader;
         this.name = name;
@@ -34,12 +36,16 @@ class XMaterial implements IMaterial{
         this.spc = spc.toArray();
         this.emi = emi.toArray();
         this.tex = tex;
+        this.bones = bones;
 
         // Uniform変数の適用
         transMatrixLocation = shader.getUniformLocation("transMatrix");
         viewMatrixLocation = shader.getUniformLocation("viewMatrix");
         projMatrixLocation = shader.getUniformLocation("projMatrix");
         colorLocation = shader.getUniformLocation("color");
+        for(i in 0...bones.length){
+            bonesLocation[i] = shader.getUniformLocation("bones[" + i + "]");
+        }
         if(tex != null){
             textureLocation = shader.getUniformLocation("texture");
         }
@@ -58,5 +64,8 @@ class XMaterial implements IMaterial{
         gd.uniformMatrix4fv(viewMatrixLocation, false, view);
         gd.uniformMatrix4fv(projMatrixLocation, false, projection);
         gd.uniform4fv(colorLocation, col);
+        for(i in 0...bones.length){
+            gd.uniformMatrix4fv(bonesLocation[i], false, bones[i].modelTransform);
+        }
     }
 }

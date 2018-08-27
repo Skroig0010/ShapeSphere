@@ -169,7 +169,7 @@ class Parser{
                     eatSemiColon();
                     eatRBrace();
                 case Symbol("Mesh") :
-                    mesh = getMesh();
+                    mesh = getMesh(name);
                 case RBrace :
                     eatRBrace();
                     break;
@@ -180,7 +180,7 @@ class Parser{
         return new Frame(name, frames, mat, mesh);
     }
 
-    function getMesh() : Mesh{
+    function getMesh(name : String) : Mesh{
         eatSymbol("Mesh");
         eatLBrace();
 
@@ -220,6 +220,8 @@ class Parser{
         var matList : MeshMaterialList = new MeshMaterialList(new Array(), new Array());
         var texCoords : Array<Vec2> = null;
         var normals : MeshNormals = null;
+        var skinMeshHeader : XSkinMeshHeader = null;
+        var skinWeights : SkinWeights = null;
         while(lexer.getToken() != null){
             switch(lexer.getToken()){
                 case Symbol("MeshMaterialList") : // MeshMaterialList読み込み
@@ -228,6 +230,10 @@ class Parser{
                     texCoords = getMeshTextureCoords();
                 case Symbol("MeshNormals") :
                     normals = getMeshNormals();
+                case Symbol("XSkinMeshHeader") :
+                    skinMeshHeader = getXSkinMeshHeader();
+                case Symbol("SkinWeights") :
+                    skinWeights = getSkinWeights();
                 case RBrace :
                     eatRBrace();
                     break;
@@ -235,7 +241,7 @@ class Parser{
                     skipDataObject();
             }
         }
-        return new Mesh(vertices, faces, matList, normals, texCoords);
+        return new Mesh(name, vertices, faces, matList, normals, texCoords, skinMeshHeader, skinWeights);
     }
 
     function getMeshNormals() : MeshNormals{
@@ -361,6 +367,45 @@ class Parser{
         eatRBrace();
 
         return new Material(name, color, pow, spc, emi, tex);
+    }
+
+    function getXSkinMeshHeader() : XSkinMeshHeader{
+        eatSymbol("XSkinMeshHeader");
+        eatLBrace();
+        var nMaxSkinWeightsPerVertex = getInt(); eatSemiColon();
+        if( nMaxSkinWeightsPerVertex > 4) throw "頂点あたりのウェイトの数が多すぎます.";
+        var nMaxSkinWeightsPerFace = getInt(); eatSemiColon();
+        var nBones = getInt(); eatSemiColon();
+        eatRBrace();
+
+        return new XSkinMeshHeader(nMaxSkinWeightsPerVertex, nMaxSkinWeightsPerFace, nBones);
+    }
+
+    function getSkinWeights() : SkinWeights{
+        eatSymbol("SkinWeights");
+        eatLBrace();
+        var nodeName = getString(); eatSemiColon();
+        var nWeights = getInt(); eatSemiColon();
+
+        var vertexIndices = new Array<Int>();
+        for(i in 0...nWeights){
+            vertexIndices.push(getInt());
+            if(i != nWeights - 1)eatComma();
+        }
+        eatSemiColon();
+
+        var weights = new Array<Float>();
+        for(i in 0...nWeights){
+            weights.push(getFloat());
+            if(i != nWeights - 1)eatComma();
+        }
+        eatSemiColon();
+
+        var matOffset = getMat4();
+        eatSemiColon();
+        eatRBrace();
+
+        return new SkinWeights(nodeName, nWeights, vertexIndices, weights, matOffset);
     }
 
     function eatSymbol(?s : String) : Bool{

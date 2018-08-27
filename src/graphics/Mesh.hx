@@ -2,7 +2,7 @@ package src.graphics;
 import js.html.webgl.*;
 import src.math.*;
 import src.scene.Scene;
-import src.graphics.vertices.VertexPositionNormalTexture;
+import src.graphics.vertices.VertexDeclaration;
 
 class Mesh{
     static var maxId : Int;
@@ -18,14 +18,17 @@ class Mesh{
     public var indexBuffer(default, null) : Buffer;
     public var vertexBuffer(default, null) : Buffer;
 
+    var vertexDeclaration : VertexDeclaration;
+
     var gd : GraphicsDevice;
 
-    public function new(gd : GraphicsDevice, name, vertices : Array<Float>, indices : Array<Int>){
+    public function new(gd : GraphicsDevice, name, vertices : Array<Float>, indices : Array<Int>, vertexDeclaration : VertexDeclaration){
         this.gd = gd;
         this.name = name;
         id = maxId++;
         this.visible = true;
-        vertexBuffer = gd.createArrayBuffer(vertices);
+        this.vertexDeclaration = vertexDeclaration;
+        vertexBuffer = gd.createFloat32ArrayBuffer(vertices);
         indexBuffer = gd.createIndexBuffer(indices);
         meshParts = new List<MeshPart>();
     }
@@ -36,7 +39,7 @@ class Mesh{
             gd.setIndexBuffer(indexBuffer);
             for(part in meshParts){
                 part.material.apply(world, view, projection);
-                gd.drawElements(RenderingContext.TRIANGLES, part.vertexOffset, part.numVertices, VertexPositionNormalTexture.vertexDeclaration, part.material.shader);
+                gd.drawElements(RenderingContext.TRIANGLES, part.vertexOffset, part.numVertices, vertexDeclaration, part.material.shader);
             }
         }
     }

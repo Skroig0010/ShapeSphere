@@ -1,5 +1,6 @@
 package src.graphics;
 import js.html.webgl.*;
+import src.graphics.materials.*;
 
 class MeshPart{
     public var material(default, null):IMaterial;

@@ -2,7 +2,7 @@ package src.parser.mqo;
 import src.scene.Scene;
 import src.graphics.Mesh;
 import src.graphics.MeshPart;
-import src.graphics.IMaterial;
+import src.graphics.materials.IMaterial;
 
 class Mqo{
     public var scene : Scene;

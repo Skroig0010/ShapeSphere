@@ -1,4 +1,4 @@
-package src.graphics;
+package src.graphics.materials;
 import js.html.webgl.RenderingContext;
 import js.html.webgl.UniformLocation;
 import src.graphics.shader.Shader;

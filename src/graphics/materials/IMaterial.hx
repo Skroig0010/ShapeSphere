@@ -1,4 +1,4 @@
-package src.graphics;
+package src.graphics.materials;
 import js.html.webgl.RenderingContext;
 import js.html.webgl.UniformLocation;
 import src.graphics.shader.Shader;
@@ -9,4 +9,3 @@ interface IMaterial{
     public var shader(default, null):Shader;
     public function apply(world : Mat4, view : Mat4, projection : Mat4):Void;
 }
-

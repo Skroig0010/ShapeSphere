@@ -64,7 +64,7 @@ class GraphicsDevice{
         gl.bindBuffer(RenderingContext.ELEMENT_ARRAY_BUFFER, null);
     }
 
-    public function createArrayBuffer(vertices : Array<Float>) : Buffer{
+    public function createFloat32ArrayBuffer(vertices : Array<Float>) : Buffer{
         var buffer = gl.createBuffer();
         gl.bindBuffer(RenderingContext.ARRAY_BUFFER, buffer);
         gl.bufferData(RenderingContext.ARRAY_BUFFER, cast new js.html.Float32Array(cast vertices), RenderingContext.STATIC_DRAW);

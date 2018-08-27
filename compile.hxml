@@ -10,13 +10,15 @@ src.graphics.DebugPrimitive
 src.graphics.DebugPrimitiveShape
 src.graphics.GraphicsDevice
 src.graphics.GraphicsExtensions
-src.graphics.MqoMaterial
-src.graphics.XMaterial
-src.graphics.IMaterial
 src.graphics.Mesh
 src.graphics.MeshPart
 src.graphics.Model
 src.graphics.Texture
+
+src.graphics.materials.MqoMaterial
+src.graphics.materials.XMaterial
+src.graphics.materials.IMaterial
+src.graphics.materials.SkinnedMaterial
 
 src.graphics.shader.Shader
 
@@ -30,6 +32,7 @@ src.graphics.vertices.VertexElementFormat
 src.graphics.vertices.VertexElementUsage
 src.graphics.vertices.VertexPosition
 src.graphics.vertices.VertexPositionNormalTexture
+src.graphics.vertices.VertexPositionNormalTextureWeights
 src.graphics.vertices.VertexPositionTexture
 
 
