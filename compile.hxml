@@ -1,64 +1,70 @@
--cp src
--main src.Game
-src.camera.Camera
+-cp shapesphere
+-main shapesphere.Game
+shapesphere.camera.Camera
 
-src.content.ContentManager
-src.content.contentreaders.ModelReader
+shapesphere.content.ContentManager
+shapesphere.content.contentreaders.ModelReader
 
-src.graphics.Color
-src.graphics.DebugPrimitive
-src.graphics.DebugPrimitiveShape
-src.graphics.GraphicsDevice
-src.graphics.GraphicsExtensions
-src.graphics.Mesh
-src.graphics.MeshPart
-src.graphics.Model
-src.graphics.Texture
+shapesphere.graphics.Color
+shapesphere.graphics.DebugPrimitive
+shapesphere.graphics.DebugPrimitiveShape
+shapesphere.graphics.GraphicsDevice
+shapesphere.graphics.GraphicsExtensions
+shapesphere.graphics.Mesh
+shapesphere.graphics.MeshPart
+shapesphere.graphics.Model
+shapesphere.graphics.Texture
 
-src.graphics.materials.MqoMaterial
-src.graphics.materials.XMaterial
-src.graphics.materials.IMaterial
-src.graphics.materials.SkinnedMaterial
+shapesphere.graphics.animation.AnimationClip
+shapesphere.graphics.animation.AnimationPlayer
+shapesphere.graphics.animation.KeyFrame
+shapesphere.graphics.animation.SkinningData
+shapesphere.graphics.animation.TimeSpan
 
-src.graphics.shader.Shader
+shapesphere.graphics.materials.MqoMaterial
+shapesphere.graphics.materials.XMaterial
+shapesphere.graphics.materials.IMaterial
+shapesphere.graphics.materials.SkinnedMaterial
 
-src.graphics.states.TextureAddressMode
-src.graphics.states.TextureFilter
+shapesphere.graphics.shader.Shader
 
-src.graphics.vertices.VertexType
-src.graphics.vertices.VertexDeclaration
-src.graphics.vertices.VertexElement
-src.graphics.vertices.VertexElementFormat
-src.graphics.vertices.VertexElementUsage
-src.graphics.vertices.VertexPosition
-src.graphics.vertices.VertexPositionNormalTexture
-src.graphics.vertices.VertexPositionNormalTextureWeights
-src.graphics.vertices.VertexPositionTexture
+shapesphere.graphics.states.TextureAddressMode
+shapesphere.graphics.states.TextureFilter
+
+shapesphere.graphics.vertices.VertexType
+shapesphere.graphics.vertices.VertexDeclaration
+shapesphere.graphics.vertices.VertexElement
+shapesphere.graphics.vertices.VertexElementFormat
+shapesphere.graphics.vertices.VertexElementUsage
+shapesphere.graphics.vertices.VertexPosition
+shapesphere.graphics.vertices.VertexPositionNormalTexture
+shapesphere.graphics.vertices.VertexPositionNormalTextureWeights
+shapesphere.graphics.vertices.VertexPositionTexture
 
 
-src.math.Vec2
-src.math.Vec2Data
-src.math.Vec3
-src.math.Vec3Data
-src.math.Vec4
-src.math.Vec4Data
-src.math.Mat4
-src.math.Mat4Data
-src.math.Quaternion
-src.math.QuaternionData
+shapesphere.math.Vec2
+shapesphere.math.Vec2Data
+shapesphere.math.Vec3
+shapesphere.math.Vec3Data
+shapesphere.math.Vec4
+shapesphere.math.Vec4Data
+shapesphere.math.Mat4
+shapesphere.math.Mat4Data
+shapesphere.math.Quaternion
+shapesphere.math.QuaternionData
 
-src.parser.mqo.Mqo
-src.parser.mqo.Lexer
-src.parser.mqo.Parser
-src.parser.mqo.Val
-src.parser.x.X
-src.parser.x.Frame
-src.parser.x.Lexer
-src.parser.x.Material
-src.parser.x.Mesh
-src.parser.x.MeshMaterialList
-src.parser.x.Parser
-src.parser.x.Val
+shapesphere.parser.mqo.Mqo
+shapesphere.parser.mqo.Lexer
+shapesphere.parser.mqo.Parser
+shapesphere.parser.mqo.Val
+shapesphere.parser.x.X
+shapesphere.parser.x.Frame
+shapesphere.parser.x.Lexer
+shapesphere.parser.x.Material
+shapesphere.parser.x.Mesh
+shapesphere.parser.x.MeshMaterialList
+shapesphere.parser.x.Parser
+shapesphere.parser.x.Val
 
-src.scene.Scene
+shapesphere.scene.Scene
 -js build/Game.js
