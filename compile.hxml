@@ -42,8 +42,12 @@ shapesphere.graphics.vertices.VertexPositionNormalTextureWeights
 shapesphere.graphics.vertices.VertexPositionTexture
 
 shapesphere.input.IKeyboard
+shapesphere.input.IMouse
+shapesphere.input.InputManager
 shapesphere.input.Keyboard
 shapesphere.input.Keys
+shapesphere.input.Mouse
+shapesphere.input.MouseButton
 
 shapesphere.math.Vec2
 shapesphere.math.Vec2Data
